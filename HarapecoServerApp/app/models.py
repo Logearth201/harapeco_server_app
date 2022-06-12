@@ -80,12 +80,14 @@ class Group(models.Model):
     explain = models.CharField(max_length=100)
     score = models.IntegerField(default=0)
     is_delete = models.BooleanField(default=False)
+    auto_belong_group = models.BooleanField(default=False)
 
 class AttributeGroupInfo(models.Model):
     objects = BaseManager()
     user = models.ForeignKey("app.User", on_delete=models.CASCADE)
     group = models.ForeignKey("app.Group", on_delete=models.CASCADE)
     authentication = models.IntegerField(default=1) # 0：リーダー、1：一般ユーザー
+    group_join_waitconfirm = models.BooleanField(default=False)
 
 class UserComment(models.Model):
     objects = BaseManager()

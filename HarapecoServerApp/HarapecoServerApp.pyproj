@@ -53,6 +53,9 @@
     <Compile Include="HarapecoServerApp\settings.py" />
     <Compile Include="HarapecoServerApp\urls.py" />
     <Compile Include="HarapecoServerApp\wsgi.py" />
+    <Compile Include="util\apiutil.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="util\util.py">
       <SubType>Code</SubType>
     </Compile>

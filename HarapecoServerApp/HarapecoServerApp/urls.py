@@ -29,5 +29,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('groups/all', views.groups_all, name='groups_all'),
     path('groups/show/<slug:group_id>', views.groups_show, name='groups_show'),
-    # path('groups/member/<slug:group_id>', views.groups_member, name='groups_member'),
+    path('groups/member/<slug:group_id>', views.groups_member, name='groups_member'),
+    path('groups/create', views.groups_create, name='groups_create'),
 ]

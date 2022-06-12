@@ -1,4 +1,4 @@
-import random, string
+import random, string, json
 from email.mime.text import MIMEText
 from email.utils import formatdate
 import smtplib
