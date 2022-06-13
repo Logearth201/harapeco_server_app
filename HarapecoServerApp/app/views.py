@@ -9,7 +9,7 @@ from datetime import datetime
 from django.db import transaction
 from django.http import HttpRequest
 from .models import User, UserManager, Group, AttributeGroupInfo
-from .forms import GroupCreateForm
+from .forms import GroupCreateForm, GroupDeleteForm, GroupJoinForm, GroupJoinAllowForm
 from util import apiutil
 
 def home(request):
@@ -151,7 +151,7 @@ def groups_create(request):
     # formの正当性チェック
     form = GroupCreateForm(request.POST)
     if not form.is_valid():
-        return apiutil.convert_json_result(request, {"result": "NG", "ErrorCode": "403"}))
+        return apiutil.convert_json_result(request, {"result": "NG", "ErrorCode": "403"})
 
     # トランザクション
     transaction.set_autocommit(False)
@@ -165,7 +165,7 @@ def groups_create(request):
         group.save()
 
         belongs_data = AttributeGroupInfo()
-        belongs_data.group_join_waitconfirm = True # 自分自身なので
+        belongs_data.group_join_waitconfirm = False # 自分自身なので
         belongs_data.authentication = 0 # Master
         belongs_data.group = group
         belongs_data.user = user
@@ -180,3 +180,43 @@ def groups_create(request):
 
     return apiutil.convert_json_result(request, {"Result": "OK", "ErrorCode": "200", "Data": {"GroupID": group.id}})
 
+# グループの削除
+def groups_delete(request):
+    # 現在のユーザーの取得
+    user = request.user
+    if not user.is_authenticated:
+        return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "401"})
+
+    # POST以外は拒否
+    if request.method != "POST":
+        return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "405"})
+
+    # formの正当性チェック
+    form = GroupDeleteForm(request.POST)
+    if not form.is_valid():
+        return apiutil.convert_json_result(request, {"result": "NG", "ErrorCode": "403"})
+
+    # Groupの取得
+    group = Group.objects.get_or_none(id=form.cleaned_data["id"], is_delete=False)
+    if group is None:
+        return apiutil.convert_json_result(request, {"result": "NG", "ErrorCode": "404"})
+
+    # トランザクション
+    transaction.set_autocommit(False)
+
+    try:
+        # ラウンジを作成、自身をリーダーにさせる
+        group.is_delete = True
+        group.save()
+
+        # 所属情報をすべて捨てる
+        AttributeGroupInfo.objects.filter(group=group).delete()
+    except Exception as e:
+        print(e)
+        transaction.rollback()
+        return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "500"})
+    finally:
+        transaction.commit()
+        transaction.set_autocommit(True)
+
+    return apiutil.convert_json_result(request, {"Result": "OK", "ErrorCode": "200"})

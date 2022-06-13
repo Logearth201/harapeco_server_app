@@ -21,3 +21,14 @@ class GroupCreateForm(forms.Form):
     name = forms.CharField(max_length=60, required=True)
     explain = forms.CharField(max_length=200, required=True)
     auto_belong = forms.CharField(max_length=1, required=True)
+
+class GroupDeleteForm(forms.Form):
+    id = forms.IntegerField()
+
+class GroupJoinForm(forms.Form):
+    id = forms.IntegerField()
+
+    
+class GroupJoinAllowForm(forms.Form):
+    id = forms.IntegerField()
+    allow_status = forms.BooleanField()
