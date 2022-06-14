@@ -30,5 +30,5 @@ class GroupJoinForm(forms.Form):
 
     
 class GroupJoinAllowForm(forms.Form):
-    id = forms.IntegerField()
-    allow_status = forms.BooleanField()
+    id = forms.IntegerField(required=True)
+    allow_status = forms.CharField(max_length=1, required=True)

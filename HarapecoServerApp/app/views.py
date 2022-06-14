@@ -73,7 +73,7 @@ def groups_user(request):
         # 現在のユーザーの取得
         user = request.user
         if not user.is_authenticated:
-            return HttpResponse(json.dumps({"result": "NG", "errorCode": "401"}))
+            return HttpResponse(json.dumps({"Result": "NG", "errorCode": "401"}))
         
         # ユーザー単位でオブジェクトを検索
         group_join_infos = AttributeGroupInfo.objects.filter(user=user)
@@ -151,7 +151,7 @@ def groups_create(request):
     # formの正当性チェック
     form = GroupCreateForm(request.POST)
     if not form.is_valid():
-        return apiutil.convert_json_result(request, {"result": "NG", "ErrorCode": "403"})
+        return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "403"})
 
     # トランザクション
     transaction.set_autocommit(False)
@@ -194,12 +194,12 @@ def groups_delete(request):
     # formの正当性チェック
     form = GroupDeleteForm(request.POST)
     if not form.is_valid():
-        return apiutil.convert_json_result(request, {"result": "NG", "ErrorCode": "403"})
+        return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "403"})
 
     # Groupの取得
     group = Group.objects.get_or_none(id=form.cleaned_data["id"], is_delete=False)
     if group is None:
-        return apiutil.convert_json_result(request, {"result": "NG", "ErrorCode": "404"})
+        return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "404"})
 
     # トランザクション
     transaction.set_autocommit(False)
@@ -220,3 +220,86 @@ def groups_delete(request):
         transaction.set_autocommit(True)
 
     return apiutil.convert_json_result(request, {"Result": "OK", "ErrorCode": "200"})
+
+# グループ所属予約
+def group_join_register(request):
+    # 現在のユーザーの取得
+    user = request.user
+    if not user.is_authenticated:
+        return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "401"})
+
+    # POST以外は拒否
+    if request.method != "POST":
+        return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "405"})
+
+    # formの正当性チェック
+    form = GroupJoinForm(request.POST)
+    if not form.is_valid():
+        return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "403"})
+
+    # Groupの取得
+    group = Group.objects.get_or_none(id=form.cleaned_data["id"])
+    if group is None:
+        return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "404"})
+
+    # すでに所属済みならエラー
+    group_attr_now = AttributeGroupInfo.objects.get_or_none(group=group, user=user)
+    if group_attr_now is not None:
+        return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "G001"})
+    
+    try:
+        # ラウンジを作成、自身をリーダーにさせる
+        belongs_data = AttributeGroupInfo()
+        belongs_data.group_join_waitconfirm = group.auto_belong_group # 自分自身なので
+        belongs_data.authentication = 1 # Member
+        belongs_data.group = group
+        belongs_data.user = user
+        belongs_data.save()
+    except Exception as e:
+        print(e)
+        return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "500"})
+    finally:
+        transaction.set_autocommit(True)
+
+    return apiutil.convert_json_result(request, {"Result": "OK", "ErrorCode": "200", "WaitBelongGroup": group.auto_belong_group})
+
+# グループ承認orクビor非承認
+def group_join_admin(request):
+    # 現在のユーザーの取得
+    user = request.user
+    if not user.is_authenticated:
+        return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "401"})
+
+    # POST以外は拒否
+    if request.method != "POST":
+        return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "405"})
+
+    # formの正当性チェック
+    form = GroupJoinAllowForm(request.POST)
+    if not form.is_valid():
+        return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "403"})
+
+    # 所属情報の取得
+    attr_info = AttributeGroupInfo.objects.get_or_none(id=form.cleaned_data["id"])
+    if attr_info is None:
+        return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "404"})
+
+    # そのグループにリーダーとして属しているかどうか
+    attr_info_myself = AttributeGroupInfo.objects.get_or_none(group=attr_info.group, user=user, authentication=0)
+    if attr_info_myself is None:
+        return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "403"})
+    
+    # 情報のチェック
+
+    # 所属情報
+    if form.cleaned_data["allow_status"] == "1":
+        attr_info.group_join_waitconfirm = False
+        attr_info.save()
+    elif form.cleaned_data["allow_status"] == "0":
+        attr_info.delete()
+    else:
+        return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "400"})
+
+    return apiutil.convert_json_result(request, {"Result": "OK", "ErrorCode": "200"})
+
+# 

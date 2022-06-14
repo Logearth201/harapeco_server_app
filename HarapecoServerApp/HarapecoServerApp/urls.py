@@ -32,4 +32,6 @@ urlpatterns = [
     path('groups/member/<slug:group_id>', views.groups_member, name='groups_member'),
     path('groups/create', views.groups_create, name='groups_create'),
     path('groups/delete', views.groups_delete, name='groups_delete'),
+    path('groups/join/member', views.group_join_register, name='group_join_register'),
+    path('groups/join/admin', views.group_join_admin, name='group_join_admin'),
 ]
