@@ -2,21 +2,20 @@ import random, string, json
 from email.mime.text import MIMEText
 from email.utils import formatdate
 import smtplib
-import re, base64, cv2, io, numpy, traceback, os
-from google.cloud import storage as gcs
+import re, base64, io, traceback, os
 
-# GCP‚Ìİ’è‚Íglobal‚Å•Û‘¶
+# GCPã®è¨­å®šã¯globalã§ä¿å­˜
 bucket_name = "kanachan_test"
 gcp_json_pos = "/Users/iwata/Desktop/gcp_secret/kanachan-526d6018653f.json"
 
 
-# ƒ‰ƒ“ƒ_ƒ€•¶š—ñ
+# ãƒ©ãƒ³ãƒ€ãƒ æ–‡å­—åˆ—
 def randomname(n):
    randlst = [random.choice(string.ascii_letters + string.digits) for i in range(n)]
    return ''.join(randlst)
 
 
-# ƒ[ƒ‹“]‘—
+# ãƒ¡ãƒ¼ãƒ«è»¢é€
 def send_mail(body, subject, to_address):
     from_address = "kanatalk@career-world.net"
     password = "Tesgeowqo1!0fe"
@@ -36,15 +35,15 @@ def send_mail(body, subject, to_address):
     smtpobj.close()
 
 
-# §Œä•¶šŒ`®‚É
-# {1}{2}‚Ì’†‚É‚¢‚ë‚ñ‚È§Œä•¶‚ğ“ü‚ê‚é‚±‚Æ
-# ‰æ‘œ•ÒW‹@”\‚ğ‚È‚ß‚Ü‚í‚·‚½‚ß
+# åˆ¶å¾¡æ–‡å­—å½¢å¼ã«
+# {1}{2}ã®ä¸­ã«ã„ã‚ã‚“ãªåˆ¶å¾¡æ–‡ã‚’å…¥ã‚Œã‚‹ã“ã¨
+# ç”»åƒç·¨é›†æ©Ÿèƒ½ã‚’ãªã‚ã¾ã‚ã™ãŸã‚
 def create_message(str, list):
-    # list‚ğ‚È‚ß‚Ü‚í‚·
+    # listã‚’ãªã‚ã¾ã‚ã™
     order = -1
 
     for item in list:
-        # ”’l‚¶‚á‚È‚¢‚È‚ñ‚Ä‚±‚ñ‚È‚ÌA‰Á“Ş‚¿‚á‚ñ‚¶‚á‚È‚¢I
+        # æ•°å€¤ã˜ã‚ƒãªã„ãªã‚“ã¦ã“ã‚“ãªã®ã€åŠ å¥ˆã¡ã‚ƒã‚“ã˜ã‚ƒãªã„ï¼
         if not re.match(r'^[0-9]]$', item.number):
             continue
 
@@ -66,100 +65,6 @@ def create_message(str, list):
         else:
             pass
     return str
-
-
-# ƒ‰ƒEƒ“ƒWê—pƒtƒHƒ‹ƒ_‚Ìì¬
-def creationFolderList(lounge_id):
-    pass
-
-
-# ƒtƒ@ƒCƒ‹‚ğ•Û‘¶(GCP)
-def file_save(lounge_id, extension, creation_id, base64string):
-    # base64‚ª‚Ù‚Æ‚ñ‚Ç‹ó‚Ìê‡‚ÍI‚í‚è
-    if len(base64string) <= 1:
-        return {"result": "OK", "is_saved": False}
-
-    # ƒtƒ@ƒCƒ‹–¼‚Ì¶¬
-    def gene_file():
-        return randomname(100)
-
-    file_name = gene_file()
-
-    try:
-        # •Û‘¶æƒtƒ@ƒCƒ‹–¼‚Ìİ’è
-        fname = str(lounge_id) + "/" + str(creation_id) + "/" + file_name + "." + extension
-        tmp_file_name = "/Users/iwata/Desktop/develop/tmp/" + str(lounge_id) + "ct" + file_name + "." + extension
-
-        # ƒtƒ@ƒCƒ‹‚ÌBase64ƒfƒR[ƒh
-        img_binary = base64.b64decode(base64string)
-        image = numpy.frombuffer(img_binary, dtype=numpy.uint8)
-
-        # ƒtƒ@ƒCƒ‹‚Ìˆê•Û‘¶
-        img = cv2.imdecode(image, cv2.IMREAD_UNCHANGED)
-        cv2.imwrite(tmp_file_name, img)
-
-        # GCP‚ÉƒAƒbƒvƒ[ƒh
-        client = gcs.Client.from_service_account_json(gcp_json_pos)
-        bucket = client.get_bucket(bucket_name)
-
-        blob = gcs.Blob(fname, bucket)
-        res = blob.upload_from_filename(tmp_file_name)
-
-        os.remove(tmp_file_name)
-
-        return {"result": "OK", "is_saved": True, "full_path": fname}
-    except:
-        print("GCP ERRORS!")
-        traceback.print_exc()
-        return {"result": "NG", "is_saved": False}
-
-
-def file_delete(file_path):
-    try:
-        client = gcs.Client.from_service_account_json(gcp_json_pos)
-        bucket = client.get_bucket(bucket_name)
-
-        blob = gcs.Blob(file_path, bucket)
-        blob.delete()
-
-        return {"result": "OK"}
-    except:
-        traceback.print_exc()
-        return {"result": "NG"}
-
-
-# ƒtƒ@ƒCƒ‹‚ğƒT[ƒo[(EC3)‚©‚ç“Ç‚İ‚Ş
-def file_load(url_base_path):
-    return "https://storage.googleapis.com/kanachan_test/" + url_base_path
-
-
-# CSVƒtƒ@ƒCƒ‹‚Ì’Ç‰Áˆ—i‰æ‘œ—pj
-def csv_add_file(csv_text, file_path):
-    # ƒtƒ@ƒCƒ‹‚ÍƒoƒbƒNƒXƒ‰ƒbƒVƒ…‚²‚Æ‚É•ªŠ„
-    csv_text_lines = csv_text.split("\\")
-
-    # ƒAƒbƒvƒf[ƒg•¶š—ñ‚Í/‚²‚Æ‚É•ªŠ„i/‚Í‚±‚±‚Å‘S‚ÄƒIƒ~ƒbƒgj
-    csv_update_line = file_path.replace("\\", "")
-
-    # —v‘f‚ÉŠÜ‚Ş‚©‚Ç‚¤‚©‚ğ”»’è
-    if csv_text_lines in csv_text_lines:
-        return csv_text
-    else:
-        csv_text_lines.append(csv_update_line)
-        return "\\".join(csv_text_lines) #python‚ÌJOIN‚Í‘¼Œ¾Œê‚Ì‚Æ‚Íˆø”‚ª‹t‡‚Å‚ ‚é‚±‚Æ‚É’ˆÓI
-
-
-# CSVƒtƒ@ƒCƒ‹‚Ìíœˆ—(‰æ‘œ—p)
-def csv_delete_file(csv_text, file_path):
-    # ƒtƒ@ƒCƒ‹‚ÍƒoƒbƒNƒXƒ‰ƒbƒVƒ…‚²‚Æ‚É•ªŠ„
-    csv_text_lines = csv_text.split("\\")
-
-    # —v‘f‚ÉŠÜ‚Ş‚©‚Ç‚¤‚©‚ğ”»’è
-    if not (file_path in csv_text_lines):
-        return csv_text
-    else:
-        csv_text_lines.remove(file_path)
-        return "\\".join(csv_text_lines)  # python‚ÌJOIN‚Í‘¼Œ¾Œê‚Ì‚Æ‚Íˆø”‚ª‹t‡‚Å‚ ‚é‚±‚Æ‚É’ˆÓI
 
 
 

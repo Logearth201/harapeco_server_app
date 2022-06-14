@@ -96,3 +96,10 @@ class UserComment(models.Model):
     dislike_count = models.IntegerField(default=0)
     is_delete = models.BooleanField(default=False)
     user = models.ForeignKey("app.User", on_delete=models.CASCADE)
+
+class MailInformation(models.Model):
+    email = models.EmailField(max_length=70)
+    hash_address = models.CharField(max_length=100)
+    valid_time = models.TimeField()
+    username = models.CharField(max_length=100)
+    tmp_password = models.CharField(max_length=50)

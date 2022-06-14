@@ -28,7 +28,10 @@ class GroupDeleteForm(forms.Form):
 class GroupJoinForm(forms.Form):
     id = forms.IntegerField()
 
-    
 class GroupJoinAllowForm(forms.Form):
     id = forms.IntegerField(required=True)
     allow_status = forms.CharField(max_length=1, required=True)
+
+class MailInformationForm(forms.Form):
+    email = forms.EmailField(max_length=70)
+    username = forms.CharField(max_length=100)

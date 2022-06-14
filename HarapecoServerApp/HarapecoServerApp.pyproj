@@ -42,6 +42,7 @@
     <Compile Include="app\models.py" />
     <Compile Include="app\tests.py" />
     <Compile Include="app\views.py" />
+    <Compile Include="app\views_group.py" />
     <Compile Include="app\__init__.py" />
     <Compile Include="app\migrations\__init__.py" />
     <Compile Include="comment\admin.py" />
@@ -81,6 +82,7 @@
     <Folder Include="util\" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="app\ErrorMemo.txt" />
     <Content Include="comment\templates\comment\index.html" />
     <Content Include="requirements.txt" />
     <Content Include="db.sqlite3" />
