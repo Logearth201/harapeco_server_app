@@ -35,3 +35,7 @@ class GroupJoinAllowForm(forms.Form):
 class MailInformationForm(forms.Form):
     email = forms.EmailField(max_length=70)
     username = forms.CharField(max_length=100)
+
+class RegisterCompleteForm(forms.Form):
+    id = forms.CharField(max_length=50)
+    password = forms.CharField(max_length=50)

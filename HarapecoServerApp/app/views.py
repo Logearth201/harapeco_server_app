@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 from django.db import transaction
 from django.http import HttpRequest
 from .models import User, UserManager, Group, AttributeGroupInfo, MailInformation
-from .forms import MailInformationForm
+from .forms import MailInformationForm, RegisterCompleteForm
 from util import apiutil, util
 
 def home(request):
@@ -77,7 +77,7 @@ def register_mail_api(request):
     mailInfo = MailInformation()
     mailInfo.email = form.cleaned_data["email"]
     mailInfo.valid_time = datetime.now() + timedelta(minutes=30)
-    mailInfo.hash_address = hash_address
+    mailInfo.hash_address = hash_address # 使われていない
     mailInfo.tmp_password = pass1 + pass2 + pass3
     mailInfo.username = form.cleaned_data["username"]
     mailInfo.save()
@@ -91,8 +91,61 @@ def register_mail_api(request):
 
     util.send_mail(body, subject, mailInfo.email)
 
-    return HttpResponse(json.dumps({"Result": "OK", "ErrorCode": "200", "data": {
+    return apiutil.convert_json_result(request, {"Result": "OK", "ErrorCode": "200", "data": {
         "PassPrefix": pass1,
         "PassCenter": pass2,
         "Id": mailInfo.id
-    }}))
+    }})
+
+# ユーザー登録
+def register_complete_api(request):
+    # POST以外は禁止に
+    if request.method != 'POST':
+        return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "405"})
+
+    # フォームを取得
+    form = RegisterCompleteForm(request.POST)
+    if not form.is_valid():
+        return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "403"})
+
+    password = form.cleaned_data["password"]
+    id = form.cleaned_data["id"]
+
+    sign_up_info = MailInformation.objects.get_or_none(id=id)
+    if sign_up_info is None:
+        return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "404"})
+
+    # サインアップ情報の存在性をチェック
+    sign_up_info = MailInformation.objects.filter(id=id, tmp_password=password).first()
+    if sign_up_info is None:
+        return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "E002"})
+
+    # すでに登録してあるAddressがあるかどうかを再度判定する
+    user = User.objects.filter(email=sign_up_info.email).first()
+    if user is not None:
+        return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "E001"})
+
+    # トランザクション
+    transaction.set_autocommit(False)
+
+    try:
+        # フォームのチェック
+        user = User()
+        user.email = sign_up_info.email
+        user.username = sign_up_info.username + "#" + util.randomname(6)
+        user.save()
+
+        # いらない仮登録情報はすべて消す。
+        # 同一メールアドレスのも含めて。
+        sign_up_info.delete()
+        MailInformation.objects.filter(email=sign_up_info.email).delete()
+    except Exception as e:
+        print(e)
+        transaction.rollback()
+        return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "500"})
+    finally:
+        transaction.commit()
+        transaction.set_autocommit(True)
+
+    # TODO：ログインさせることに！
+    return apiutil.convert_json_result(request, {"Result": "OK", "ErrorCode": "200"})

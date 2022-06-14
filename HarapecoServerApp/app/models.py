@@ -98,6 +98,7 @@ class UserComment(models.Model):
     user = models.ForeignKey("app.User", on_delete=models.CASCADE)
 
 class MailInformation(models.Model):
+    objects = BaseManager()
     email = models.EmailField(max_length=70)
     hash_address = models.CharField(max_length=100)
     valid_time = models.TimeField()
