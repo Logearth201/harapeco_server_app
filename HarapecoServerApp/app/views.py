@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 from django.db import transaction
 from django.http import HttpRequest
 from .models import User, UserManager, Group, AttributeGroupInfo, MailInformation
-from .forms import MailInformationForm, RegisterCompleteForm
+from .forms import MailInformationForm, RegisterCompleteForm, SetTemporaryPassForm
 from util import apiutil, util
 
 def home(request):
@@ -149,3 +149,37 @@ def register_complete_api(request):
 
     # TODO：ログインさせることに！
     return apiutil.convert_json_result(request, {"Result": "OK", "ErrorCode": "200"})
+
+# 一時パスワードセット用サービス。たいていのサービスで影響があるので注意。
+# メールにパスワードを一旦セットさせる。
+def prepare_login_api(request):
+    if request.method != "POST":
+        return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "405"})
+
+    form = SetTemporaryPassForm(request.POST)
+
+    if not form.is_valid():
+        return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "403"})
+
+    email = form.cleaned_data.get("email")
+    pass1 = util.randomname(10) # アプリを通して渡されます。
+    pass2 = util.randomname(3) # アプリ、メールを通して渡されます。
+    pass3 = util.randomname(8) # メール、アプリを通して渡されます。
+
+    user = User.objects.get_or_none(email=email)
+    if user is None:
+        return HttpResponse(json.dumps({"Result": "OK", "ErrorCode": "200", "data": {"passPrefix": pass1, "passCenter": pass2}}))
+
+    user.set_password(pass1 + pass2 + pass3)
+    user.save()
+
+    body = "一時用パスワードを配布します。ここに記載されているパスワードをフォームに入力してください。セキュリティの都合から、制限時間は10分とします。\r\n\r\n" \
+           "パスコード：\r\n" + pass2 + pass3 + "\r\n\r\n" \
+           "注意：別端末でログインを試行しようとした場合はリセットされます。その場合は再度最初からやり直してください。\r\n\r\n" \
+                                          "重要：ログイン処理を行なっていないのにメールが確認できた場合、外部からの不正なログイン試行の可能性があります。メールアドレスの変更を推奨します。"
+
+    subject = "Kanatalk メールログインパスワード"
+
+    util.send_mail(body, subject, email)
+
+    return apiutil.convert_json_result(request, {"Result": "OK", "ErrorCode": "200", "data": {"passPrefix": pass1, "passCenter": pass2}})

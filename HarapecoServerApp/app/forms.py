@@ -39,3 +39,6 @@ class MailInformationForm(forms.Form):
 class RegisterCompleteForm(forms.Form):
     id = forms.CharField(max_length=50)
     password = forms.CharField(max_length=50)
+
+class SetTemporaryPassForm(forms.Form):
+    email = forms.CharField(max_length=70)

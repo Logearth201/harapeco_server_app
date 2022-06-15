@@ -104,3 +104,12 @@ class MailInformation(models.Model):
     valid_time = models.TimeField()
     username = models.CharField(max_length=100)
     tmp_password = models.CharField(max_length=50)
+
+class UserDeviceLogin(models.Model):
+    objects = BaseManager()
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE
+    )
+    auth_key = models.CharField(max_length=200,default="",db_index=True)
+    push_notification_token = models.CharField(max_length=100)
+    register_datetime = models.DateTimeField(default=timezone.now)

@@ -27,6 +27,7 @@ urlpatterns = [
          name='login'),
     path('logout/', LogoutView.as_view(next_page='/'), name='logout'),
     path('admin/', admin.site.urls),
+    path('signin/api', views.prepare_login_api, name='prepare_login_api'),
     path('signup/api', views.register_mail_api, name='register_mail_api'),
     path('signup/complete', views.register_complete_api, name='register_complete_api'),
     path('groups/all', views_group.groups_all, name='groups_all'),
