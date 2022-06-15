@@ -168,7 +168,7 @@ def prepare_login_api(request):
 
     user = User.objects.get_or_none(email=email)
     if user is None:
-        return apiutil.convert_json_result(request, {"Result": "OK", "ErrorCode": "200", "data": {"passPrefix": pass1, "passCenter": pass2}})
+        return apiutil.convert_json_result(request, {"Result": "OK", "ErrorCode": "200", "data": {"PassPrefix": pass1, "PassCenter": pass2}})
 
     user.set_password(pass1 + pass2 + pass3)
     user.save()
@@ -182,4 +182,4 @@ def prepare_login_api(request):
 
     util.send_mail(body, subject, email)
 
-    return apiutil.convert_json_result(request, {"Result": "OK", "ErrorCode": "200", "data": {"passPrefix": pass1, "passCenter": pass2}})
+    return apiutil.convert_json_result(request, {"Result": "OK", "ErrorCode": "200", "data": {"PassPrefix": pass1, "PassCenter": pass2}})
