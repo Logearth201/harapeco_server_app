@@ -60,3 +60,6 @@ class UserLogoutForm(forms.Form):
 class UserInfoChangeForm(forms.Form):
     email = forms.EmailField(max_length=70, required=False)
     username = forms.CharField(max_length=100, required=False)
+
+class UserInfoChangeCompleteForm(forms.Form):
+    password = forms.CharField(max_length=50)

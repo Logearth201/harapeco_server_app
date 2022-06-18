@@ -11,7 +11,7 @@ from django.contrib.auth import login, authenticate, logout
 from django.db import transaction
 from django.http import HttpRequest
 from .models import User, UserManager, Group, AttributeGroupInfo, MailInformation, UserDeviceLogin, ProcessSaver
-from .forms import MailInformationForm, RegisterCompleteForm, SetTemporaryPassForm, UserLoginForm, AutoLoginForm, UserLogoutForm, UserInfoChangeForm
+from .forms import MailInformationForm, RegisterCompleteForm, SetTemporaryPassForm, UserLoginForm, AutoLoginForm, UserLogoutForm, UserInfoChangeForm, UserInfoChangeCompleteForm
 from util import apiutil, util
 
 def home(request):
@@ -306,29 +306,32 @@ def user_logout(request):
 
 # ユーザー情報変更
 def user_modify_begin(request):
-    try:
-        # POST以外は禁止に
-        if request.method != 'POST':
-            return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "405"})
+    # POST以外は禁止に
+    if request.method != 'POST':
+        return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "405"})
 
-        # フォームを取得
-        form = UserInfoChangeForm(request.POST)
-        if not form.is_valid():
-            return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "403"})
+    # フォームを取得
+    form = UserInfoChangeForm(request.POST)
+    if not form.is_valid():
+        return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "403"})
 
-        # 現在のユーザーの取得
-        user = request.user
-        if not user.is_authenticated:
-            return HttpResponse(json.dumps({"Result": "NG", "errorCode": "401"}))
+    # 現在のユーザーの取得
+    user = request.user
+    if not user.is_authenticated:
+        return HttpResponse(json.dumps({"Result": "NG", "errorCode": "401"}))
     
-        # パスコードを発行
-        pass1_1 = util.randomname(10)  # アプリを通して渡されます。
-        pass1_2 = util.randomname(3)  # アプリ、メールを通して渡されます。
-        pass1_3 = util.randomname(7)  # メールを通して渡されます。
-        pass2_1 = util.randomname(10)  # アプリを通して渡されます。渡されないパターンもあります。
-        pass2_2 = util.randomname(3)  # アプリ、メールを通して渡されます。渡されないパターンもあります。
-        pass2_3 = util.randomname(7)  # メールを通して渡されます。渡されないパターンもあります。
+    # パスコードを発行
+    pass1_1 = util.randomname(10)  # アプリを通して渡されます。
+    pass1_2 = util.randomname(3)  # アプリ、メールを通して渡されます。
+    pass1_3 = util.randomname(7)  # メールを通して渡されます。
+    pass2_1 = util.randomname(10)  # アプリを通して渡されます。渡されないパターンもあります。
+    pass2_2 = util.randomname(3)  # アプリ、メールを通して渡されます。渡されないパターンもあります。
+    pass2_3 = util.randomname(7)  # メールを通して渡されます。渡されないパターンもあります。
 
+    # トランザクション
+    transaction.set_autocommit(False)
+
+    try:
         # ユーザー変更情報を一旦データとして保存する
         process_saver = ProcessSaver.objects.get_or_none(user=user)
         if process_saver is None:
@@ -345,6 +348,8 @@ def user_modify_begin(request):
         process_saver.process_type = "ModifyUser"
         process_saver.password = pass1_1 + pass1_2 + pass1_3 + pass2_1 + pass2_2 + pass2_3
         process_saver.save()
+
+        # TODO：メールアドレスの確認をせよ！
 
         # メールを提出する（メイン）
         body = "一時用パスワードを配布します。ここに記載されているパスワードをフォームに入力してください。セキュリティの都合から、制限時間は10分とします。\r\n\r\n" \
@@ -380,4 +385,63 @@ def user_modify_begin(request):
             }})
     except Exception as e:
         print(e)
+        transaction.rollback()
         return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "500"})
+    finally:
+        transaction.commit()
+        transaction.set_autocommit(True)
+
+# ユーザー情報変更（確定）
+def user_modify_end(request):
+    # 現在のユーザーの取得
+    user = request.user
+    if not user.is_authenticated:
+        return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "401"})
+
+    # POST以外は拒否
+    if request.method != "POST":
+        return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "405"})
+
+    # formの正当性チェック
+    form = UserInfoChangeCompleteForm(request.POST)
+    if not form.is_valid():
+        return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "403"})
+
+    # ユーザー編集オブジェクトを取得
+    process_saver = ProcessSaver.objects.get_or_none(user=user, process_type="ModifyUser")
+    if process_saver is None:
+        return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "404"})
+
+    # パスワードチェック
+    if process_saver.password != form.cleaned_data["password"]:
+        return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "404"})
+
+    # トランザクション
+    transaction.set_autocommit(False)
+
+    try:
+        # ユーザー情報を強制変更
+        dic = json.loads(process_saver.data)
+        username = dic["UserName"]
+        email = dic["Email"]
+
+        if username.strip() != "":
+            user.username = username
+
+        if email.strip() != "":
+            user.email = email
+
+        # 編集完了時
+        user.save()
+
+        # 編集完了したので不要なデータは削除
+        process_saver.delete()
+    except Exception as e:
+        print(e)
+        transaction.rollback()
+        return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "500"})
+    finally:
+        transaction.commit()
+        transaction.set_autocommit(True)
+
+    return apiutil.convert_json_result(request, {"Result": "OK", "ErrorCode": "200"})
