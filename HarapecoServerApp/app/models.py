@@ -113,3 +113,12 @@ class UserDeviceLogin(models.Model):
     auth_key = models.CharField(max_length=200,default="",db_index=True)
     push_notification_token = models.CharField(max_length=100)
     register_datetime = models.DateTimeField(default=timezone.now)
+
+# 各種重要な手続きデータを保存するためのモデル。ログインは除く。
+class ProcessSaver(models.Model):
+    objects = BaseManager()
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    valid_time = models.TimeField()
+    process_type = models.CharField(max_length=15)
+    data = models.CharField(max_length=4000)
+    password = models.CharField(max_length=100)

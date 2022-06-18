@@ -200,7 +200,7 @@ def group_join_register(request):
         return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "403"})
 
     # Groupの取得
-    group = Group.objects.get_or_none(id=form.cleaned_data["id"])
+    group = Group.objects.get_or_none(id=form.cleaned_data["id"], is_delete=False)
     if group is None:
         return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "404"})
 

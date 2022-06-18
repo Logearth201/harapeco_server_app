@@ -2,6 +2,7 @@
 Definition of forms.
 """
 
+from urllib import request
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm
 from django.utils.translation import ugettext_lazy as _
@@ -55,3 +56,7 @@ class AutoLoginForm(forms.Form):
 
 class UserLogoutForm(forms.Form):
     auth_key = forms.CharField(max_length=200, required=False)
+
+class UserInfoChangeForm(forms.Form):
+    email = forms.EmailField(max_length=70, required=False)
+    username = forms.CharField(max_length=100, required=False)
