@@ -27,7 +27,10 @@ urlpatterns = [
          name='login'),
     path('logout/', LogoutView.as_view(next_page='/'), name='logout'),
     path('admin/', admin.site.urls),
-    path('signin/api', views.prepare_login_api, name='prepare_login_api'),
+    path('signout', views.user_logout, name='user_logout'),
+    path('signin/begin', views.prepare_login_api, name='prepare_login_api'),
+    path('signin/end', views.end_login_api, name='end_login_api'),
+    path('signin/auto', views.auto_login, name='auto_login'),
     path('signup/api', views.register_mail_api, name='register_mail_api'),
     path('signup/complete', views.register_complete_api, name='register_complete_api'),
     path('groups/all', views_group.groups_all, name='groups_all'),
@@ -37,4 +40,5 @@ urlpatterns = [
     path('groups/delete', views_group.groups_delete, name='groups_delete'),
     path('groups/join/member', views_group.group_join_register, name='group_join_register'),
     path('groups/join/admin', views_group.group_join_admin, name='group_join_admin'),
+
 ]

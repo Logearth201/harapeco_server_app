@@ -6,10 +6,11 @@ from django.shortcuts import render, redirect, get_object_or_404, \
     get_list_or_404, Http404, HttpResponse
 import json
 from datetime import datetime, timedelta
+from django.contrib.auth import login, authenticate, logout
 from django.db import transaction
 from django.http import HttpRequest
-from .models import User, UserManager, Group, AttributeGroupInfo, MailInformation
-from .forms import MailInformationForm, RegisterCompleteForm, SetTemporaryPassForm
+from .models import User, UserManager, Group, AttributeGroupInfo, MailInformation, UserDeviceLogin
+from .forms import MailInformationForm, RegisterCompleteForm, SetTemporaryPassForm, UserLoginForm, AutoLoginForm, UserLogoutForm
 from util import apiutil, util
 
 def home(request):
@@ -183,3 +184,116 @@ def prepare_login_api(request):
     util.send_mail(body, subject, email)
 
     return apiutil.convert_json_result(request, {"Result": "OK", "ErrorCode": "200", "data": {"PassPrefix": pass1, "PassCenter": pass2}})
+
+# このまま残す
+def end_login_api(request):
+    if request.method != "POST":
+        return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "405"})
+
+    form = UserLoginForm(request.POST)
+
+    if not form.is_valid():
+        return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "403"})
+
+    email = form.cleaned_data.get("email")
+    password = form.cleaned_data.get("password")
+    push_notification_token = form.cleaned_data.get("push_notification_token")
+
+    user = User.objects.filter(email=email).first()
+
+    if user is None:
+        return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "401"})
+
+    user = authenticate(username=user.username, password=password)
+    if user is None:
+        return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "401"})
+    else:
+        login(request, user=user)
+
+        # ログインが終わったら、パスワードを強制的に別のものにさせる。ただし、「１」ならば例外とする。
+        if password != "1":
+            user.set_password(util.randomname(500))
+
+        # 自動ログインに必要な情報を渡す
+        user_id = user.id
+        auth_key = util.randomname(150)
+
+        userDeviceLogin = UserDeviceLogin()
+        userDeviceLogin.user = user
+        userDeviceLogin.auth_key = auth_key
+        userDeviceLogin.push_notification_token = push_notification_token
+        userDeviceLogin.save()
+
+        response = apiutil.convert_json_result(request, {"Result": "OK", "ErrorCode": "200", "data": {
+            "userID": user_id,
+            "authKey": auth_key
+        }})
+
+        return response
+
+# 各イベントに実装させる自動ログインの仕組み(user/isauthenticateを継承させる)
+def auto_login(request):
+    if request.method != "POST":
+        return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "405"})
+
+    form = AutoLoginForm(request.POST)
+
+    if not form.is_valid():
+        return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "403"})
+
+    # formから値をセット
+    user_id = form.cleaned_data["user_id"]
+    auth_key = form.cleaned_data["auth_key"]
+    push_notification_token = form.cleaned_data["push_notification_token"]
+
+    # ユーザー情報の確認
+    user = User.objects.filter(id=user_id).first()
+    if user is None:
+        return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "401"})
+
+    # 自動ログイン記録があるかどうかを調査する
+    user_device_login = None
+    user_device_login_list = UserDeviceLogin.objects.filter(user=user)
+    user_auto_login_exist = False
+
+    for auto_login in user_device_login_list:
+        if auto_login.user.id == user.id and auth_key == auto_login.auth_key:
+            user_device_login = auto_login
+            break
+    if user_device_login is None:
+        # もしなければ例外処理
+        return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "401"})
+
+    # push通知のキーを書き換える
+    if push_notification_token != user_device_login.push_notification_token:
+        user_device_login.push_notification_token = push_notification_token
+        user_device_login.save()
+
+    # OKならば(この時点でログインは成功済み)、そのまま続行させる
+    login(request, user)
+
+    # 成功レスポンス
+    response = apiutil.convert_json_result(request, {"Result": "OK", "ErrorCode": "200", "data": {
+        "userID": user_id
+    }})
+
+    return response
+
+def user_logout(request):
+    user = request.user
+    if not user.is_authenticated:
+        return apiutil.convert_json_result(request, {"Result": "OK", "ErrorCode": "200"})
+
+    # ログアウト処理
+    logout(request)
+
+    # ユーザー認証情報を消す
+    form = UserLogoutForm(request.POST)
+
+    if form.is_valid():
+        auth_key = form.cleaned_data["auth_key"]
+
+        user_device_login = UserDeviceLogin.objects.filter(user=user, auth_key=auth_key)
+        user_device_login.delete()
+    
+    return apiutil.convert_json_result(request, {"Result": "OK", "ErrorCode": "200"})

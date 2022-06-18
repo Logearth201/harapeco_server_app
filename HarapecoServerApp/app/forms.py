@@ -42,3 +42,16 @@ class RegisterCompleteForm(forms.Form):
 
 class SetTemporaryPassForm(forms.Form):
     email = forms.CharField(max_length=70)
+
+class UserLoginForm(forms.Form):
+    email = forms.CharField(max_length=70)
+    password = forms.CharField(max_length=30)
+    push_notification_token = forms.CharField(max_length=500, required=False)
+
+class AutoLoginForm(forms.Form):
+    user_id = forms.CharField(max_length=30, required=False)
+    auth_key = forms.CharField(max_length=200, required=False)
+    push_notification_token = forms.CharField(max_length=500, required=False)
+
+class UserLogoutForm(forms.Form):
+    auth_key = forms.CharField(max_length=200, required=False)
