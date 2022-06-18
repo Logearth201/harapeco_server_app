@@ -282,94 +282,102 @@ def auto_login(request):
 
 # ログアウト用
 def user_logout(request):
-    user = request.user
-    if not user.is_authenticated:
-        return apiutil.convert_json_result(request, {"Result": "OK", "ErrorCode": "200"})
+    try:
+        user = request.user
+        if not user.is_authenticated:
+            return apiutil.convert_json_result(request, {"Result": "OK", "ErrorCode": "200"})
 
-    # ログアウト処理
-    logout(request)
+        # ログアウト処理
+        logout(request)
 
-    # ユーザー認証情報を消す
-    form = UserLogoutForm(request.POST)
+        # ユーザー認証情報を消す
+        form = UserLogoutForm(request.POST)
 
-    if form.is_valid():
-        auth_key = form.cleaned_data["auth_key"]
+        if form.is_valid():
+            auth_key = form.cleaned_data["auth_key"]
 
-        user_device_login = UserDeviceLogin.objects.filter(user=user, auth_key=auth_key)
-        user_device_login.delete()
+            user_device_login = UserDeviceLogin.objects.filter(user=user, auth_key=auth_key)
+            user_device_login.delete()
     
-    return apiutil.convert_json_result(request, {"Result": "OK", "ErrorCode": "200"})
+        return apiutil.convert_json_result(request, {"Result": "OK", "ErrorCode": "200"})
+    except Exception as e:
+        print(e)
+        return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "500"})
 
 # ユーザー情報変更
 def user_modify_begin(request):
-    # POST以外は禁止に
-    if request.method != 'POST':
-        return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "405"})
+    try:
+        # POST以外は禁止に
+        if request.method != 'POST':
+            return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "405"})
 
-    # フォームを取得
-    form = UserInfoChangeForm(request.POST)
-    if not form.is_valid():
-        return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "403"})
+        # フォームを取得
+        form = UserInfoChangeForm(request.POST)
+        if not form.is_valid():
+            return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "403"})
 
-    # 現在のユーザーの取得
-    user = request.user
-    if not user.is_authenticated:
-        return HttpResponse(json.dumps({"Result": "NG", "errorCode": "401"}))
+        # 現在のユーザーの取得
+        user = request.user
+        if not user.is_authenticated:
+            return HttpResponse(json.dumps({"Result": "NG", "errorCode": "401"}))
     
-    # パスコードを発行
-    pass1_1 = util.randomname(10)  # アプリを通して渡されます。
-    pass1_2 = util.randomname(3)  # アプリ、メールを通して渡されます。
-    pass1_3 = util.randomname(7)  # メールを通して渡されます。
-    pass2_1 = util.randomname(10)  # アプリを通して渡されます。渡されないパターンもあります。
-    pass2_2 = util.randomname(3)  # アプリ、メールを通して渡されます。渡されないパターンもあります。
-    pass2_3 = util.randomname(7)  # メールを通して渡されます。渡されないパターンもあります。
+        # パスコードを発行
+        pass1_1 = util.randomname(10)  # アプリを通して渡されます。
+        pass1_2 = util.randomname(3)  # アプリ、メールを通して渡されます。
+        pass1_3 = util.randomname(7)  # メールを通して渡されます。
+        pass2_1 = util.randomname(10)  # アプリを通して渡されます。渡されないパターンもあります。
+        pass2_2 = util.randomname(3)  # アプリ、メールを通して渡されます。渡されないパターンもあります。
+        pass2_3 = util.randomname(7)  # メールを通して渡されます。渡されないパターンもあります。
 
-    # ユーザー変更情報を一旦データとして保存する
-    process_saver = ProcessSaver.objects.get_or_none(user=user)
-    if process_saver is None:
-        process_saver = ProcessSaver()
-        process_saver.user = user
+        # ユーザー変更情報を一旦データとして保存する
+        process_saver = ProcessSaver.objects.get_or_none(user=user)
+        if process_saver is None:
+            process_saver = ProcessSaver()
+            process_saver.user = user
 
-    # 変更情報
-    email = form.cleaned_data["email"]
-    process_saver.valid_time = datetime.now() + timedelta(minutes=30)
-    process_saver.data = json.dumps({
-        "Email": email,
-        "UserName": form.cleaned_data["username"]
-        })
-    process_saver.process_type = "ModifyUser"
-    process_saver.password = pass1_1 + pass1_2 + pass1_3 + pass2_1 + pass2_2 + pass2_3
-    process_saver.save()
+        # 変更情報
+        email = form.cleaned_data["email"]
+        process_saver.valid_time = datetime.now() + timedelta(minutes=30)
+        process_saver.data = json.dumps({
+            "Email": email,
+            "UserName": form.cleaned_data["username"]
+            })
+        process_saver.process_type = "ModifyUser"
+        process_saver.password = pass1_1 + pass1_2 + pass1_3 + pass2_1 + pass2_2 + pass2_3
+        process_saver.save()
 
-    # メールを提出する（メイン）
-    body = "一時用パスワードを配布します。ここに記載されているパスワードをフォームに入力してください。セキュリティの都合から、制限時間は10分とします。\r\n\r\n" \
-           "パスコード：\r\n" + pass1_2 + pass1_3 + "\r\n\r\n" \
-                                          "注意：別端末でログインを試行しようとした場合はリセットされます。その場合は再度最初からやり直してください。\r\n\r\n" \
-                                          "重要：ログイン処理を行なっていないのにメールが確認できた場合、外部からの不正なログイン試行の可能性があります。メールアドレスの変更を推奨します。"
-    subject = "Kanatalk ユーザー情報変更の確認（メイン）"
-    util.send_mail(body, subject, user.email)
-
-    # メールアドレスが異なっているケースでは
-    if user.email != email and email.strip() != "":
+        # メールを提出する（メイン）
         body = "一時用パスワードを配布します。ここに記載されているパスワードをフォームに入力してください。セキュリティの都合から、制限時間は10分とします。\r\n\r\n" \
-           "パスコード：\r\n" + pass1_2 + pass1_3 + "\r\n\r\n" \
-                                          "注意：別端末でログインを試行しようとした場合はリセットされます。その場合は再度最初からやり直してください。\r\n\r\n" \
-                                          "重要：ログイン処理を行なっていないのにメールが確認できた場合、外部からの不正なログイン試行の可能性があります。メールアドレスの変更を推奨します。"
-        subject = "Kanatalk ユーザー情報変更の確認（サブ）"
-        util.send_mail(body, subject, email)
+               "パスコード：\r\n" + pass1_2 + pass1_3 + "\r\n\r\n" \
+                                              "注意：別端末でログインを試行しようとした場合はリセットされます。その場合は再度最初からやり直してください。\r\n\r\n" \
+                                              "重要：ログイン処理を行なっていないのにメールが確認できた場合、外部からの不正なログイン試行の可能性があります。メールアドレスの変更を推奨します。"
+        subject = "Kanatalk ユーザー情報変更の確認（メイン）"
+        util.send_mail(body, subject, user.email)
 
-        return apiutil.convert_json_result(request, {"Result": "OK", "ErrorCode": "200", "data": {
-            "PassPrefix": pass1_1,
-            "PassCenter": pass1_2,
-            "PassSuffix": "",
-            "Id": process_saver.id
-        }})
-    else:
-        return apiutil.convert_json_result(request, {"Result": "OK", "ErrorCode": "200", "data": {
-            "PassPrefix": pass1_1,
-            "PassCenter": pass1_2,
-            "PassSuffix": pass2_1 + pass2_2 + pass2_3,
-            "Id": process_saver.id
-        }})
+        # メールアドレスが異なっているケースでは
+        if user.email != email and email.strip() != "":
+            body = "一時用パスワードを配布します。ここに記載されているパスワードをフォームに入力してください。セキュリティの都合から、制限時間は10分とします。\r\n\r\n" \
+               "パスコード：\r\n" + pass1_2 + pass1_3 + "\r\n\r\n" \
+                                              "注意：別端末でログインを試行しようとした場合はリセットされます。その場合は再度最初からやり直してください。\r\n\r\n" \
+                                              "重要：ログイン処理を行なっていないのにメールが確認できた場合、外部からの不正なログイン試行の可能性があります。メールアドレスの変更を推奨します。"
+            subject = "Kanatalk ユーザー情報変更の確認（サブ）"
+            util.send_mail(body, subject, email)
 
-    
+            return apiutil.convert_json_result(request, {"Result": "OK", "ErrorCode": "200", "data": {
+                "PassPrefix": pass1_1,
+                "PassCenter": pass1_2,
+                "PassSuffix": pass2_1,
+                "Id": process_saver.id,
+                "IsMailAddressChange": true
+            }})
+        else:
+            return apiutil.convert_json_result(request, {"Result": "OK", "ErrorCode": "200", "data": {
+                "PassPrefix": pass1_1,
+                "PassCenter": pass1_2,
+                "PassSuffix": pass2_1 + pass2_2 + pass2_3,
+                "Id": process_saver.id,
+                "IsMailAddressChange": false
+            }})
+    except Exception as e:
+        print(e)
+        return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "500"})
