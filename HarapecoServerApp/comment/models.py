@@ -13,11 +13,13 @@ class UserComment(models.Model):
     is_delete = models.BooleanField(default=False)
 
 class GroupTopic(models.Model):
+    objects = BaseManager()
     topic_name = models.CharField(max_length=100)
-    group = models.ForeignKey("app.User", on_delete=models.CASCADE)
+    group = models.ForeignKey("app.Group", on_delete=models.CASCADE)
     is_delete = models.BooleanField(default=False)
 
 class GroupTopicComment(models.Model):
+    objects = BaseManager()
     topic = models.ForeignKey(GroupTopic, on_delete=models.CASCADE, related_name="GroupTopicComment_topic")
     fromuser = models.ForeignKey("app.User", on_delete=models.CASCADE, related_name="GroupTopicComment_fromuser")
     text = models.TextField(max_length=5000)
