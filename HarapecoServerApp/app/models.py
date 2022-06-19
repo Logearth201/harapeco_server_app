@@ -89,14 +89,6 @@ class AttributeGroupInfo(models.Model):
     authentication = models.IntegerField(default=1) # 0：リーダー、1：一般ユーザー
     group_join_waitconfirm = models.BooleanField(default=False)
 
-class UserComment(models.Model):
-    objects = BaseManager()
-    content = models.CharField(max_length=5000)
-    like_count = models.IntegerField(default=0)
-    dislike_count = models.IntegerField(default=0)
-    is_delete = models.BooleanField(default=False)
-    user = models.ForeignKey("app.User", on_delete=models.CASCADE)
-
 class MailInformation(models.Model):
     objects = BaseManager()
     email = models.EmailField(max_length=70)

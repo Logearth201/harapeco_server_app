@@ -47,9 +47,15 @@
     <Compile Include="app\migrations\__init__.py" />
     <Compile Include="comment\admin.py" />
     <Compile Include="comment\apps.py" />
+    <Compile Include="comment\forms.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="comment\migrations\__init__.py" />
     <Compile Include="comment\models.py" />
     <Compile Include="comment\tests.py" />
+    <Compile Include="comment\urls.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="comment\views.py" />
     <Compile Include="comment\__init__.py" />
     <Compile Include="manage.py" />

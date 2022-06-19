@@ -3,11 +3,10 @@ Definition of urls for HarapecoServerApp.
 """
 
 from datetime import datetime
-from django.urls import path
+from django.urls import path, include
 from django.contrib import admin
 from django.contrib.auth.views import LoginView, LogoutView
 from app import forms, views, views_group
-
 
 urlpatterns = [
     path('', views.home, name='home'),
@@ -26,6 +25,7 @@ urlpatterns = [
          ),
          name='login'),
     path('logout/', LogoutView.as_view(next_page='/'), name='logout'),
+    path('comment/', include("comment.urls")),
     path('admin/', admin.site.urls),
     path('signout', views.user_logout, name='user_logout'),
     path('signin/begin', views.prepare_login_api, name='prepare_login_api'),

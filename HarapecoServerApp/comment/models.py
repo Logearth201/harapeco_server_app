@@ -1,8 +1,27 @@
+from email.policy import default
 from django.db import models
+from app.models import BaseManager
 
 # Create your models here.
-class Comment(models.Model):
+class UserComment(models.Model):
+    objects = BaseManager()
     text = models.TextField(max_length=5000)
-    user = models.ForeignKey("app.User", on_delete=models.CASCADE)
+    user = models.ForeignKey("app.User", on_delete=models.CASCADE, related_name="UserComment_user")
+    submit_user = models.ForeignKey("app.User", on_delete=models.CASCADE, related_name="UserComment_submit_user", null=True) # cannot null
+    good_cnt = models.IntegerField(default=0)
+    bad_cnt = models.IntegerField(default=0)
+    is_delete = models.BooleanField(default=False)
 
- 
+class GroupTopic(models.Model):
+    topic_name = models.CharField(max_length=100)
+    group = models.ForeignKey("app.User", on_delete=models.CASCADE)
+    is_delete = models.BooleanField(default=False)
+
+class GroupTopicComment(models.Model):
+    topic = models.ForeignKey(GroupTopic, on_delete=models.CASCADE, related_name="GroupTopicComment_topic")
+    fromuser = models.ForeignKey("app.User", on_delete=models.CASCADE, related_name="GroupTopicComment_fromuser")
+    text = models.TextField(max_length=5000)
+    good_cnt = models.IntegerField(default=0)
+    bad_cnt = models.IntegerField(default=0)
+    is_delete = models.BooleanField(default=False)
+

@@ -349,7 +349,10 @@ def user_modify_begin(request):
         process_saver.password = pass1_1 + pass1_2 + pass1_3 + pass2_1 + pass2_2 + pass2_3
         process_saver.save()
 
-        # TODO：メールアドレスの確認をせよ！
+        # メールアドレスの確認をせよ！
+        usermail = User.objects.get_or_none(email=email)
+        if usermail is not None:
+            return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "E003"})
 
         # メールを提出する（メイン）
         body = "一時用パスワードを配布します。ここに記載されているパスワードをフォームに入力してください。セキュリティの都合から、制限時間は10分とします。\r\n\r\n" \
@@ -373,7 +376,7 @@ def user_modify_begin(request):
                 "PassCenter": pass1_2,
                 "PassSuffix": pass2_1,
                 "Id": process_saver.id,
-                "IsMailAddressChange": true
+                "IsMailAddressChange": True
             }})
         else:
             return apiutil.convert_json_result(request, {"Result": "OK", "ErrorCode": "200", "data": {
@@ -381,7 +384,7 @@ def user_modify_begin(request):
                 "PassCenter": pass1_2,
                 "PassSuffix": pass2_1 + pass2_2 + pass2_3,
                 "Id": process_saver.id,
-                "IsMailAddressChange": false
+                "IsMailAddressChange": False
             }})
     except Exception as e:
         print(e)
@@ -424,6 +427,11 @@ def user_modify_end(request):
         dic = json.loads(process_saver.data)
         username = dic["UserName"]
         email = dic["Email"]
+
+        # メールアドレスの確認をせよ！
+        usermail = User.objects.get_or_none(email=email)
+        if usermail is not None:
+            return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "E003"})
 
         if username.strip() != "":
             user.username = username
