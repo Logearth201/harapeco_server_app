@@ -2,7 +2,7 @@ from django.shortcuts import render
 from .models import UserComment, GroupTopic, GroupTopicComment
 from app.models import User, UserManager, Group
 from util import apiutil, util
-from .forms import CommentCreationForm
+from .forms import CommentCreationForm, GroupTopicCreationForm
 
 # Create your views here.
 def user_comment_submit(request):
@@ -22,7 +22,7 @@ def user_comment_submit(request):
             return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "403"})
 
         # 投稿対象のユーザーを特定する
-        target_user = User.objects.get_or_none(id=form.cleaned_data["id"])
+        target_user = User.objects.get_or_none(id=form.cleaned_data["id"], is_active=True)
         if user is None:
             return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "404"})
     
@@ -65,7 +65,7 @@ def get_user_comment(request, user_id):
 def get_group_topics(request, group_id):
     try:
         # ユーザーを特定する
-        group = Group.objects.get_or_none(id=group_id)
+        group = Group.objects.get_or_none(id=group_id, is_delete=False)
         if group is None:
             return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "404"})
 
@@ -79,6 +79,38 @@ def get_group_topics(request, group_id):
                 })
 
         return apiutil.convert_json_result(request, {"Result": "OK", "ErrorCode": "200", "Topics": topics_json})
+    except Exception as e:
+        print(e)
+        return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "500"})
+
+def add_topic(request):
+    try:
+        # GETは拒否
+        if request.method != "POST":
+            return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "405"})
+
+        # 未ログインは拒否
+        user = request.user
+        if not user.is_authenticated:
+            return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "401"})
+        
+        # フォームを取得
+        form = GroupTopicCreationForm(request.POST)
+        if not form.is_valid():
+            return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "403"})
+
+        # 追加対象のグループを特定する
+        target_group = Group.objects.get_or_none(id=form.cleaned_data["group_id"], is_delete=False)
+        if target_group is None:
+            return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "404"})
+    
+        # コメントを追加する
+        topic = GroupTopic()
+        topic.group = target_group
+        topic.topic_name = form.cleaned_data["topic_name"]
+        topic.save()
+
+        return apiutil.convert_json_result(request, {"Result": "OK", "ErrorCode": "200"})
     except Exception as e:
         print(e)
         return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "500"})
