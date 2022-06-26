@@ -145,7 +145,7 @@ def group_topic_comment_submit(request):
         if target_group_topic.group.is_delete:
             return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "404"})
 
-        # 編集権限のチェック
+        # グループにいるかのチェック
         edit_authentication = AttributeGroupInfo.objects.get_or_none(user=user, group=target_group_topic.group)
         if edit_authentication is None:
             return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "403"})
@@ -158,6 +158,51 @@ def group_topic_comment_submit(request):
         topic_comment.save()
 
         return apiutil.convert_json_result(request, {"Result": "OK", "ErrorCode": "200"})
+    except Exception as e:
+        print(e)
+        return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "500"})
+
+def group_topic_comment_nonoffset(request, group_topic_id):
+    return group_topic_comment(request, group_topic_id, 0)
+
+def group_topic_comment(request, group_topic_id, offset):
+    try:
+        # 追加対象のグループトピックを特定する
+        group_topic = GroupTopic.objects.get_or_none(id=group_topic_id, is_delete=False)
+        if group_topic is None:
+            return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "404"})
+
+        # 追加対象のグループを特定する
+        if group_topic.group.is_delete:
+            return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "404"})
+
+        # グループにいるかのチェック（自由に見れるようにしているなら別）
+        if not group_topic.is_not_belong_viewable:
+            # 未ログインは拒否
+            user = request.user
+            if not user.is_authenticated:
+                return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "401"})
+
+            edit_authentication = AttributeGroupInfo.objects.get_or_none(user=user, group=group_topic.group)
+            if edit_authentication is None:
+                return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "403"})
+
+        # トピックを取得
+        # 順番はIDから
+        offset_unit_value = 30
+        comments = GroupTopicComment.objects.filter(topic=group_topic, is_delete=False).order_by("id").reverse()[int(offset):int(offset) + offset_unit_value]
+        comments_json = []
+        for comment in comments:
+            comments_json.append({
+                "ID": comment.id,
+                "UserID": comment.fromuser.id,
+                "UserName": comment.fromuser.username,
+                "Text": comment.text,
+                "GoodCnt": comment.good_cnt,
+                "BadCnt": comment.bad_cnt,
+                })
+
+        return apiutil.convert_json_result(request, {"Result": "OK", "ErrorCode": "200", "Comments": comments_json})
     except Exception as e:
         print(e)
         return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "500"})

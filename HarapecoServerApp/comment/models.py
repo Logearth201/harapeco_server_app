@@ -17,6 +17,7 @@ class GroupTopic(models.Model):
     topic_name = models.CharField(max_length=100)
     group = models.ForeignKey("app.Group", on_delete=models.CASCADE)
     is_delete = models.BooleanField(default=False)
+    is_not_belong_viewable = models.BooleanField(default=False)
 
 class GroupTopicComment(models.Model):
     objects = BaseManager()
