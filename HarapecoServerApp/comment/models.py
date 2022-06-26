@@ -1,5 +1,6 @@
 from email.policy import default
 from django.db import models
+from django.utils import timezone
 from app.models import BaseManager
 
 # Create your models here.
@@ -27,4 +28,7 @@ class GroupTopicComment(models.Model):
     good_cnt = models.IntegerField(default=0)
     bad_cnt = models.IntegerField(default=0)
     is_delete = models.BooleanField(default=False)
+    is_edit = models.BooleanField(default=False)
+    date_submited = models.DateTimeField("date_submited", default=timezone.now)
+    date_edited = models.DateTimeField("date_edited", default=timezone.now)
 

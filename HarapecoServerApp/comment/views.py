@@ -2,7 +2,8 @@ from django.shortcuts import render
 from .models import UserComment, GroupTopic, GroupTopicComment
 from app.models import User, UserManager, Group, AttributeGroupInfo
 from util import apiutil, util
-from .forms import CommentCreationForm, GroupTopicCreationForm, GroupTopicCommentCreationForm
+from .forms import CommentCreationForm, GroupTopicCreationForm, GroupTopicCommentCreationForm, GroupTopicCommentEditForm
+from django.utils import timezone
 
 # Create your views here.
 def user_comment_submit(request):
@@ -113,6 +114,7 @@ def add_topic(request):
         topic = GroupTopic()
         topic.group = target_group
         topic.topic_name = form.cleaned_data["topic_name"]
+        topic.is_not_belong_viewable = form.cleaned_data["free_viewable"] == "1"
         topic.save()
 
         return apiutil.convert_json_result(request, {"Result": "OK", "ErrorCode": "200"})
@@ -200,9 +202,47 @@ def group_topic_comment(request, group_topic_id, offset):
                 "Text": comment.text,
                 "GoodCnt": comment.good_cnt,
                 "BadCnt": comment.bad_cnt,
+                "IsEdit": comment.is_edit,
+                "SubmitDateTime": comment.date_submited.strftime("%Y/%m/%d %H:%M:%S"),
                 })
 
         return apiutil.convert_json_result(request, {"Result": "OK", "ErrorCode": "200", "Comments": comments_json})
+    except Exception as e:
+        print(e)
+        return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "500"})
+
+def group_topic_comment_edit(request):
+    try:
+        # GETは拒否
+        if request.method != "POST":
+            return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "405"})
+
+        # 未ログインは拒否
+        user = request.user
+        if not user.is_authenticated:
+            return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "401"})
+        
+        # フォームを取得
+        form = GroupTopicCommentEditForm(request.POST)
+        if not form.is_valid():
+            return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "403"})
+        
+        # 編集対象のコメントを特定する
+        comment = GroupTopicComment.objects.get_or_none(id=form.cleaned_data["group_topic_comment_id"], is_delete=False)
+        if comment is None:
+            return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "404"})
+        
+        # ユーザーIDが不一致ならエラー
+        if comment.fromuser.id != user.id:
+            return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "403"})
+    
+        # コメントを編集する
+        comment.is_edit = True
+        comment.text = form.cleaned_data["text"]
+        comment.date_edited = timezone.now()
+        comment.save()
+
+        return apiutil.convert_json_result(request, {"Result": "OK", "ErrorCode": "200"})
     except Exception as e:
         print(e)
         return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "500"})

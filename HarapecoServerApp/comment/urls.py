@@ -8,5 +8,6 @@ urlpatterns = [
     path('group/topic/comments/<slug:group_topic_id>', views.group_topic_comment_nonoffset, name='group_topic_comment_nonoffset'),
     path('group/topic/comments/<slug:group_topic_id>/<slug:offset>', views.group_topic_comment, name='group_topic_comment'),
     path('group/topic/create', views.add_topic, name='add_topic'),
-    path('group/topic/submit', views.group_topic_comment_submit, name='group_topic_comment_submit'),
+    path('group/topic/comment/submit', views.group_topic_comment_submit, name='group_topic_comment_submit'),
+    path('group/topic/comment/edit', views.group_topic_comment_edit, name='group_topic_comment_edit'),
 ]
