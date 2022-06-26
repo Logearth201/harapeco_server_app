@@ -1,0 +1,963 @@
+{
+  "version": 6,
+  "entities": [
+    {
+      "entity": {
+        "type": "Project",
+        "id": "3a4f8d7f-2624-4603-acda-0d5565a90822",
+        "name": "HungryStandard"
+      },
+      "children": [
+        {
+          "entity": {
+            "type": "Request",
+            "method": {
+              "link": "http://tools.ietf.org/html/rfc7231#section-4.3.1",
+              "name": "GET"
+            },
+            "body": {
+              "formBody": {
+                "overrideContentType": true,
+                "encoding": "application/x-www-form-urlencoded",
+                "items": []
+              },
+              "bodyType": "Text",
+              "textBody": "text=AAA&group_topic_id=2"
+            },
+            "uri": {
+              "query": {
+                "delimiter": "&",
+                "items": [
+                  {
+                    "name": "a",
+                    "value": "f"
+                  }
+                ]
+              },
+              "scheme": {
+                "name": "http",
+                "version": "V11"
+              },
+              "host": "localhost:64021",
+              "path": "/comment/group/topic/comments/2"
+            },
+            "id": "4088f137-a94b-4fa6-bd81-c3a6641456df",
+            "name": "グループトピックコメント取得",
+            "headers": []
+          }
+        },
+        {
+          "entity": {
+            "type": "Request",
+            "method": {
+              "requestBody": true,
+              "link": "http://tools.ietf.org/html/rfc7231#section-4.3.3",
+              "name": "POST"
+            },
+            "body": {
+              "formBody": {
+                "overrideContentType": true,
+                "encoding": "application/x-www-form-urlencoded",
+                "items": []
+              },
+              "bodyType": "Text",
+              "textBody": "text=AAA6&group_topic_id=2"
+            },
+            "uri": {
+              "query": {
+                "delimiter": "&",
+                "items": [
+                  {
+                    "name": "a",
+                    "value": "f"
+                  }
+                ]
+              },
+              "scheme": {
+                "name": "http",
+                "version": "V11"
+              },
+              "host": "localhost:64021",
+              "path": "/comment/group/topic/comment/submit"
+            },
+            "id": "166f0472-2f61-4a70-aaea-285b9dedb84c",
+            "name": "グループトピックコメント投稿",
+            "headers": [
+              {
+                "enabled": true,
+                "name": "X-CSRFToken",
+                "value": "A1Svv46L1BHcxZo87OHLyCop9xLnqf1duRT9MmlJHDnoPtLm3UJSriyOq9cdFJi4"
+              },
+              {
+                "enabled": true,
+                "name": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              },
+              {
+                "enabled": true,
+                "name": "Content-Encoding",
+                "value": "utf-8"
+              }
+            ]
+          }
+        },
+        {
+          "entity": {
+            "type": "Request",
+            "method": {
+              "requestBody": true,
+              "link": "http://tools.ietf.org/html/rfc7231#section-4.3.3",
+              "name": "POST"
+            },
+            "body": {
+              "formBody": {
+                "overrideContentType": true,
+                "encoding": "application/x-www-form-urlencoded",
+                "items": []
+              },
+              "bodyType": "Text",
+              "textBody": "text=雫石&group_topic_comment_id=7"
+            },
+            "uri": {
+              "query": {
+                "delimiter": "&",
+                "items": [
+                  {
+                    "name": "a",
+                    "value": "f"
+                  }
+                ]
+              },
+              "scheme": {
+                "name": "http",
+                "version": "V11"
+              },
+              "host": "localhost:64021",
+              "path": "/comment/group/topic/comment/edit"
+            },
+            "id": "97dcb948-586e-4b2d-a2b4-f1fdd17996be",
+            "name": "グループトピックコメント編集",
+            "headers": [
+              {
+                "enabled": true,
+                "name": "X-CSRFToken",
+                "value": "A1Svv46L1BHcxZo87OHLyCop9xLnqf1duRT9MmlJHDnoPtLm3UJSriyOq9cdFJi4"
+              },
+              {
+                "enabled": true,
+                "name": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              },
+              {
+                "enabled": true,
+                "name": "Content-Encoding",
+                "value": "utf-8"
+              }
+            ]
+          }
+        },
+        {
+          "entity": {
+            "type": "Request",
+            "method": {
+              "requestBody": true,
+              "link": "http://tools.ietf.org/html/rfc7231#section-4.3.3",
+              "name": "POST"
+            },
+            "body": {
+              "formBody": {
+                "overrideContentType": true,
+                "encoding": "application/x-www-form-urlencoded",
+                "items": []
+              },
+              "bodyType": "Text",
+              "textBody": "topic_name=不自由に見れるグループ&group_id=1&free_viewable=0"
+            },
+            "uri": {
+              "query": {
+                "delimiter": "&",
+                "items": [
+                  {
+                    "name": "a",
+                    "value": "f"
+                  }
+                ]
+              },
+              "scheme": {
+                "name": "http",
+                "version": "V11"
+              },
+              "host": "localhost:64021",
+              "path": "/comment/group/topic/create"
+            },
+            "id": "921eb681-c12b-40ea-86a1-5649035a11c6",
+            "name": "グループトピック作成",
+            "headers": [
+              {
+                "enabled": true,
+                "name": "X-CSRFToken",
+                "value": "A1Svv46L1BHcxZo87OHLyCop9xLnqf1duRT9MmlJHDnoPtLm3UJSriyOq9cdFJi4"
+              },
+              {
+                "enabled": true,
+                "name": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              },
+              {
+                "enabled": true,
+                "name": "Content-Encoding",
+                "value": "utf-8"
+              }
+            ]
+          }
+        },
+        {
+          "entity": {
+            "type": "Request",
+            "method": {
+              "link": "http://tools.ietf.org/html/rfc7231#section-4.3.1",
+              "name": "GET"
+            },
+            "body": {
+              "formBody": {
+                "overrideContentType": true,
+                "encoding": "application/x-www-form-urlencoded",
+                "items": []
+              },
+              "bodyType": "Text"
+            },
+            "uri": {
+              "query": {
+                "delimiter": "&",
+                "items": []
+              },
+              "scheme": {
+                "name": "http",
+                "version": "V11"
+              },
+              "host": "localhost:64021",
+              "path": "/comment/group/topic/get/2"
+            },
+            "id": "209867aa-d2af-414c-be3f-c785935ec3a5",
+            "name": "グループトピック取得",
+            "headers": []
+          }
+        },
+        {
+          "entity": {
+            "type": "Request",
+            "method": {
+              "link": "http://tools.ietf.org/html/rfc7231#section-4.3.1",
+              "name": "GET"
+            },
+            "body": {
+              "formBody": {
+                "overrideContentType": true,
+                "encoding": "application/x-www-form-urlencoded",
+                "items": []
+              },
+              "bodyType": "Text"
+            },
+            "uri": {
+              "query": {
+                "delimiter": "&",
+                "items": []
+              },
+              "scheme": {
+                "name": "http",
+                "version": "V11"
+              },
+              "host": "localhost:64021",
+              "path": "/groups/member/1"
+            },
+            "id": "9a1e192b-a957-49ea-8536-5dc9fca87e39",
+            "name": "グループ会員取得",
+            "headers": []
+          }
+        },
+        {
+          "entity": {
+            "type": "Request",
+            "method": {
+              "requestBody": true,
+              "link": "http://tools.ietf.org/html/rfc7231#section-4.3.3",
+              "name": "POST"
+            },
+            "body": {
+              "formBody": {
+                "overrideContentType": true,
+                "encoding": "application/x-www-form-urlencoded",
+                "items": []
+              },
+              "bodyType": "Text",
+              "textBody": "name=test&explain=explaintest&auto_belong=1"
+            },
+            "uri": {
+              "query": {
+                "delimiter": "&",
+                "items": []
+              },
+              "scheme": {
+                "name": "http",
+                "version": "V11"
+              },
+              "host": "localhost:64021",
+              "path": "/groups/member/1"
+            },
+            "id": "9f2b7bc0-1864-4245-a309-90cb43fe5793",
+            "name": "グループ削除",
+            "headers": [
+              {
+                "enabled": true,
+                "name": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              },
+              {
+                "enabled": true,
+                "name": "X-CSRFToken",
+                "value": "mr8T3Ii3Fkn8uzhXsKkPMBueSM8lsjDMWDWhVvkmKBo0vvKQaMshiJjNdjjnMweA"
+              }
+            ]
+          }
+        },
+        {
+          "entity": {
+            "type": "Request",
+            "method": {
+              "requestBody": true,
+              "link": "http://tools.ietf.org/html/rfc7231#section-4.3.3",
+              "name": "POST"
+            },
+            "body": {
+              "formBody": {
+                "overrideContentType": true,
+                "encoding": "application/x-www-form-urlencoded",
+                "items": []
+              },
+              "bodyType": "Text",
+              "textBody": "id=6&allow_status=0"
+            },
+            "uri": {
+              "query": {
+                "delimiter": "&",
+                "items": []
+              },
+              "scheme": {
+                "name": "http",
+                "version": "V11"
+              },
+              "host": "localhost:64021",
+              "path": "/groups/join/admin"
+            },
+            "id": "c58bd95b-0c0e-4322-a0d2-d1a211ae375b",
+            "name": "グループ加盟",
+            "headers": [
+              {
+                "enabled": true,
+                "name": "X-CSRFToken",
+                "value": "z1axDuoJeADxRTYXUNcYt1z1MeErgRjJNCRDMwDxkkXft4Y7gqjWf7LIzhfwIFgp"
+              },
+              {
+                "enabled": true,
+                "name": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              },
+              {
+                "enabled": true,
+                "name": "Content-Encoding",
+                "value": "utf-8"
+              }
+            ]
+          }
+        },
+        {
+          "entity": {
+            "type": "Request",
+            "method": {
+              "requestBody": true,
+              "link": "http://tools.ietf.org/html/rfc7231#section-4.3.3",
+              "name": "POST"
+            },
+            "body": {
+              "formBody": {
+                "overrideContentType": true,
+                "encoding": "application/x-www-form-urlencoded",
+                "items": []
+              },
+              "bodyType": "Text",
+              "textBody": "id=5"
+            },
+            "uri": {
+              "query": {
+                "delimiter": "&",
+                "items": []
+              },
+              "scheme": {
+                "name": "http",
+                "version": "V11"
+              },
+              "host": "localhost:64021",
+              "path": "/groups/join/member"
+            },
+            "id": "e7204234-c71f-4e85-9e05-6ce49f9e5222",
+            "name": "グループ申請",
+            "headers": [
+              {
+                "enabled": true,
+                "name": "X-CSRFToken",
+                "value": "z1axDuoJeADxRTYXUNcYt1z1MeErgRjJNCRDMwDxkkXft4Y7gqjWf7LIzhfwIFgp"
+              },
+              {
+                "enabled": true,
+                "name": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              },
+              {
+                "enabled": true,
+                "name": "Content-Encoding",
+                "value": "utf-8"
+              }
+            ]
+          }
+        },
+        {
+          "entity": {
+            "type": "Request",
+            "method": {
+              "requestBody": true,
+              "link": "http://tools.ietf.org/html/rfc7231#section-4.3.3",
+              "name": "POST"
+            },
+            "body": {
+              "formBody": {
+                "overrideContentType": true,
+                "encoding": "application/x-www-form-urlencoded",
+                "items": []
+              },
+              "bodyType": "Text",
+              "textBody": "name=test&explain=explaintest&auto_belong=1"
+            },
+            "uri": {
+              "query": {
+                "delimiter": "&",
+                "items": [
+                  {
+                    "name": "a",
+                    "value": "f"
+                  }
+                ]
+              },
+              "scheme": {
+                "name": "http",
+                "version": "V11"
+              },
+              "host": "localhost:64021",
+              "path": "/groups/create"
+            },
+            "id": "1c19954a-05e6-4c79-87aa-6a8d5a61f0e1",
+            "name": "グループ設立",
+            "headers": [
+              {
+                "enabled": true,
+                "name": "X-CSRFToken",
+                "value": "z1axDuoJeADxRTYXUNcYt1z1MeErgRjJNCRDMwDxkkXft4Y7gqjWf7LIzhfwIFgp"
+              },
+              {
+                "enabled": true,
+                "name": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              },
+              {
+                "enabled": true,
+                "name": "Content-Encoding",
+                "value": "utf-8"
+              }
+            ]
+          }
+        },
+        {
+          "entity": {
+            "type": "Request",
+            "method": {
+              "link": "http://tools.ietf.org/html/rfc7231#section-4.3.1",
+              "name": "GET"
+            },
+            "body": {
+              "formBody": {
+                "overrideContentType": true,
+                "encoding": "application/x-www-form-urlencoded",
+                "items": []
+              },
+              "bodyType": "Text"
+            },
+            "uri": {
+              "query": {
+                "delimiter": "&",
+                "items": []
+              },
+              "scheme": {
+                "name": "http",
+                "version": "V11"
+              },
+              "host": "localhost:64021",
+              "path": "/comment/user/get/1"
+            },
+            "id": "7cb0d660-6222-44de-90d6-26eba9d89787",
+            "name": "ユーザーコメント取得",
+            "headers": []
+          }
+        },
+        {
+          "entity": {
+            "type": "Request",
+            "method": {
+              "requestBody": true,
+              "link": "http://tools.ietf.org/html/rfc7231#section-4.3.3",
+              "name": "POST"
+            },
+            "body": {
+              "formBody": {
+                "overrideContentType": true,
+                "encoding": "application/x-www-form-urlencoded",
+                "items": []
+              },
+              "bodyType": "Text",
+              "textBody": "text=takahara2&id=2"
+            },
+            "uri": {
+              "query": {
+                "delimiter": "&",
+                "items": []
+              },
+              "scheme": {
+                "name": "http",
+                "version": "V11"
+              },
+              "host": "localhost:64021",
+              "path": "/comment/user/submit"
+            },
+            "id": "7a7b1552-ff7d-437c-a516-3daccccff99c",
+            "name": "ユーザーコメント投稿",
+            "headers": [
+              {
+                "enabled": true,
+                "name": "X-CSRFToken",
+                "value": "A1Svv46L1BHcxZo87OHLyCop9xLnqf1duRT9MmlJHDnoPtLm3UJSriyOq9cdFJi4"
+              },
+              {
+                "enabled": true,
+                "name": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              },
+              {
+                "enabled": true,
+                "name": "Content-Encoding",
+                "value": "utf-8"
+              }
+            ]
+          }
+        },
+        {
+          "entity": {
+            "type": "Request",
+            "method": {
+              "requestBody": true,
+              "link": "http://tools.ietf.org/html/rfc7231#section-4.3.3",
+              "name": "POST"
+            },
+            "body": {
+              "formBody": {
+                "overrideContentType": true,
+                "encoding": "application/x-www-form-urlencoded",
+                "items": []
+              },
+              "bodyType": "Text",
+              "textBody": "auth_key=123"
+            },
+            "uri": {
+              "query": {
+                "delimiter": "&",
+                "items": []
+              },
+              "scheme": {
+                "name": "http",
+                "version": "V11"
+              },
+              "host": "localhost:64021",
+              "path": "/signout"
+            },
+            "id": "186dcf55-18c6-45eb-b80c-6f84cbb2a5e9",
+            "name": "ユーザーログアウト",
+            "headers": [
+              {
+                "enabled": true,
+                "name": "X-CSRFToken",
+                "value": "mr8T3Ii3Fkn8uzhXsKkPMBueSM8lsjDMWDWhVvkmKBo0vvKQaMshiJjNdjjnMweA"
+              },
+              {
+                "enabled": true,
+                "name": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              },
+              {
+                "enabled": true,
+                "name": "Content-Encoding",
+                "value": "utf-8"
+              }
+            ]
+          }
+        },
+        {
+          "entity": {
+            "type": "Request",
+            "method": {
+              "requestBody": true,
+              "link": "http://tools.ietf.org/html/rfc7231#section-4.3.3",
+              "name": "POST"
+            },
+            "body": {
+              "formBody": {
+                "overrideContentType": true,
+                "encoding": "application/x-www-form-urlencoded",
+                "items": []
+              },
+              "bodyType": "Text",
+              "textBody": "email=testermode.47.abvoid@gmail.com&password=ebKsXsDWBm4LkOxDE8kEr&push_notification_token=kusanoyui"
+            },
+            "uri": {
+              "query": {
+                "delimiter": "&",
+                "items": []
+              },
+              "scheme": {
+                "name": "http",
+                "version": "V11"
+              },
+              "host": "localhost:64021",
+              "path": "/signin/end"
+            },
+            "id": "e7537ad7-8b9b-4875-80a4-2257090b4742",
+            "name": "ユーザーログイン完了",
+            "headers": [
+              {
+                "enabled": true,
+                "name": "X-CSRFToken",
+                "value": "z1axDuoJeADxRTYXUNcYt1z1MeErgRjJNCRDMwDxkkXft4Y7gqjWf7LIzhfwIFgp"
+              },
+              {
+                "enabled": true,
+                "name": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              },
+              {
+                "enabled": true,
+                "name": "Content-Encoding",
+                "value": "utf-8"
+              }
+            ]
+          }
+        },
+        {
+          "entity": {
+            "type": "Request",
+            "method": {
+              "requestBody": true,
+              "link": "http://tools.ietf.org/html/rfc7231#section-4.3.3",
+              "name": "POST"
+            },
+            "body": {
+              "formBody": {
+                "overrideContentType": true,
+                "encoding": "application/x-www-form-urlencoded",
+                "items": []
+              },
+              "bodyType": "Text",
+              "textBody": "email=testermode.47.abvoid@gmail.com"
+            },
+            "uri": {
+              "query": {
+                "delimiter": "&",
+                "items": []
+              },
+              "scheme": {
+                "name": "http",
+                "version": "V11"
+              },
+              "host": "localhost:64021",
+              "path": "/signin/begin"
+            },
+            "id": "fd6c1040-f6d3-47c5-9966-fe6ec600432a",
+            "name": "ユーザーログイン開始",
+            "headers": [
+              {
+                "enabled": true,
+                "name": "X-CSRFToken",
+                "value": "z1axDuoJeADxRTYXUNcYt1z1MeErgRjJNCRDMwDxkkXft4Y7gqjWf7LIzhfwIFgp"
+              },
+              {
+                "enabled": true,
+                "name": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              },
+              {
+                "enabled": true,
+                "name": "Content-Encoding",
+                "value": "utf-8"
+              }
+            ]
+          }
+        },
+        {
+          "entity": {
+            "type": "Request",
+            "method": {
+              "requestBody": true,
+              "link": "http://tools.ietf.org/html/rfc7231#section-4.3.3",
+              "name": "POST"
+            },
+            "body": {
+              "formBody": {
+                "overrideContentType": true,
+                "encoding": "application/x-www-form-urlencoded",
+                "items": []
+              },
+              "bodyType": "Text",
+              "textBody": "email=testermode.47.abvoid@gmail.com&username=takahara"
+            },
+            "uri": {
+              "query": {
+                "delimiter": "&",
+                "items": []
+              },
+              "scheme": {
+                "name": "http",
+                "version": "V11"
+              },
+              "host": "localhost:64021",
+              "path": "/user_modify/begin"
+            },
+            "id": "257a2cfb-e41c-4d1a-b52d-01f595ff9cb2",
+            "name": "ユーザー情報変更",
+            "headers": [
+              {
+                "enabled": true,
+                "name": "X-CSRFToken",
+                "value": "A1Svv46L1BHcxZo87OHLyCop9xLnqf1duRT9MmlJHDnoPtLm3UJSriyOq9cdFJi4"
+              },
+              {
+                "enabled": true,
+                "name": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              },
+              {
+                "enabled": true,
+                "name": "Content-Encoding",
+                "value": "utf-8"
+              }
+            ]
+          }
+        },
+        {
+          "entity": {
+            "type": "Request",
+            "method": {
+              "requestBody": true,
+              "link": "http://tools.ietf.org/html/rfc7231#section-4.3.3",
+              "name": "POST"
+            },
+            "body": {
+              "formBody": {
+                "overrideContentType": true,
+                "encoding": "application/x-www-form-urlencoded",
+                "items": []
+              },
+              "bodyType": "Text",
+              "textBody": "password=xBND4iurGZfqaQ9o3Ks7tG4oNaIbGVufh0lFbGh8"
+            },
+            "uri": {
+              "query": {
+                "delimiter": "&",
+                "items": []
+              },
+              "scheme": {
+                "name": "http",
+                "version": "V11"
+              },
+              "host": "localhost:64021",
+              "path": "/user_modify/end"
+            },
+            "id": "97693851-7e8a-4a4d-b395-13a0211fa6f7",
+            "name": "ユーザー情報変更完了",
+            "headers": [
+              {
+                "enabled": true,
+                "name": "X-CSRFToken",
+                "value": "A1Svv46L1BHcxZo87OHLyCop9xLnqf1duRT9MmlJHDnoPtLm3UJSriyOq9cdFJi4"
+              },
+              {
+                "enabled": true,
+                "name": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              },
+              {
+                "enabled": true,
+                "name": "Content-Encoding",
+                "value": "utf-8"
+              }
+            ]
+          }
+        },
+        {
+          "entity": {
+            "type": "Request",
+            "method": {
+              "requestBody": true,
+              "link": "http://tools.ietf.org/html/rfc7231#section-4.3.3",
+              "name": "POST"
+            },
+            "body": {
+              "formBody": {
+                "overrideContentType": true,
+                "encoding": "application/x-www-form-urlencoded",
+                "items": []
+              },
+              "bodyType": "Text",
+              "textBody": "id=2&password=K92xHTRNw8qaYoHRuGRl"
+            },
+            "uri": {
+              "query": {
+                "delimiter": "&",
+                "items": []
+              },
+              "scheme": {
+                "name": "http",
+                "version": "V11"
+              },
+              "host": "localhost:64021",
+              "path": "/signup/complete"
+            },
+            "id": "fdaf3d55-6d42-4fc7-b760-f0b842360704",
+            "name": "ユーザー登録完了",
+            "headers": [
+              {
+                "enabled": true,
+                "name": "X-CSRFToken",
+                "value": "z1axDuoJeADxRTYXUNcYt1z1MeErgRjJNCRDMwDxkkXft4Y7gqjWf7LIzhfwIFgp"
+              },
+              {
+                "enabled": true,
+                "name": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              },
+              {
+                "enabled": true,
+                "name": "Content-Encoding",
+                "value": "utf-8"
+              }
+            ]
+          }
+        },
+        {
+          "entity": {
+            "type": "Request",
+            "method": {
+              "requestBody": true,
+              "link": "http://tools.ietf.org/html/rfc7231#section-4.3.3",
+              "name": "POST"
+            },
+            "body": {
+              "formBody": {
+                "overrideContentType": true,
+                "encoding": "application/x-www-form-urlencoded",
+                "items": []
+              },
+              "bodyType": "Text",
+              "textBody": "email=testermode.47.abvoid@gmail.com&username=YuiKusano"
+            },
+            "uri": {
+              "query": {
+                "delimiter": "&",
+                "items": []
+              },
+              "scheme": {
+                "name": "http",
+                "version": "V11"
+              },
+              "host": "localhost:64021",
+              "path": "/signup/api"
+            },
+            "id": "f44fe106-1318-4dc4-be60-796b939b165e",
+            "name": "ユーザー登録開始",
+            "headers": [
+              {
+                "enabled": true,
+                "name": "X-CSRFToken",
+                "value": "z1axDuoJeADxRTYXUNcYt1z1MeErgRjJNCRDMwDxkkXft4Y7gqjWf7LIzhfwIFgp"
+              },
+              {
+                "enabled": true,
+                "name": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              },
+              {
+                "enabled": true,
+                "name": "Content-Encoding",
+                "value": "utf-8"
+              }
+            ]
+          }
+        },
+        {
+          "entity": {
+            "type": "Request",
+            "method": {
+              "requestBody": true,
+              "link": "http://tools.ietf.org/html/rfc7231#section-4.3.3",
+              "name": "POST"
+            },
+            "body": {
+              "formBody": {
+                "overrideContentType": true,
+                "encoding": "application/x-www-form-urlencoded",
+                "items": []
+              },
+              "bodyType": "Text",
+              "textBody": "user_id=3&authkey=G8pR3d8deRGy5KOZaTVtvqP0iAIE6c2sO30bGCSUnA6dsRm0vKZrV0rFJpyPZIfuhzfOsHMP8oMzBdl4e6sFOHQCx9oVnyWlY6HDwpvicvymm2RXk6EhqZoDJ5LVLqBa8Xbcr40FS0aDBFNc8JBmWB&push_notification_token=123\n"
+            },
+            "uri": {
+              "query": {
+                "delimiter": "&",
+                "items": []
+              },
+              "scheme": {
+                "name": "http",
+                "version": "V11"
+              },
+              "host": "localhost:64021",
+              "path": "/signin/auto"
+            },
+            "id": "c6997453-5323-4ae5-ab93-2e58a2c3fe67",
+            "name": "自動ログイン",
+            "headers": [
+              {
+                "enabled": true,
+                "name": "X-CSRFToken",
+                "value": "mr8T3Ii3Fkn8uzhXsKkPMBueSM8lsjDMWDWhVvkmKBo0vvKQaMshiJjNdjjnMweA"
+              },
+              {
+                "enabled": true,
+                "name": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              },
+              {
+                "enabled": true,
+                "name": "Content-Encoding",
+                "value": "utf-8"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
