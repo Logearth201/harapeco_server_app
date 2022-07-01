@@ -2,7 +2,7 @@ from django.shortcuts import render
 from .models import UserComment, GroupTopic, GroupTopicComment
 from app.models import User, UserManager, Group, AttributeGroupInfo
 from util import apiutil, util
-from .forms import CommentCreationForm, GroupTopicCreationForm, GroupTopicCommentCreationForm, GroupTopicCommentEditForm
+from .forms import CommentCreationForm, GroupTopicCreationForm, GroupTopicCommentCreationForm, GroupTopicCommentEditForm, GroupTopicEditForm, GroupTopicDeleteForm
 from django.utils import timezone
 
 # Create your views here.
@@ -84,6 +84,42 @@ def get_group_topics(request, group_id):
         print(e)
         return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "500"})
 
+def edit_group_topic(request):
+    try:
+        # GETは拒否
+        if request.method != "POST":
+            return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "405"})
+
+        # 未ログインは拒否
+        user = request.user
+        if not user.is_authenticated:
+            return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "401"})
+        
+        # フォームを取得
+        form = GroupTopicEditForm(request.POST)
+        if not form.is_valid():
+            return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "403"})
+
+        # 対象のトピックを取得
+        topic = GroupTopic.objects.get_or_none(id=form.cleaned_data["topic_id"], is_delete=False)
+        if topic is None:
+            return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "404"})
+
+        # 編集権限のチェック
+        edit_authentication = AttributeGroupInfo.objects.get_or_none(user=user, group=topic.group, authentication=0)
+        if edit_authentication is None:
+            return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "403"})
+    
+        # トピックを編集する
+        topic.topic_name = form.cleaned_data["topic_name"]
+        topic.is_not_belong_viewable = form.cleaned_data["free_viewable"] == "1"
+        topic.save()
+
+        return apiutil.convert_json_result(request, {"Result": "OK", "ErrorCode": "200"})
+    except Exception as e:
+        print(e)
+        return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "500"})
+
 def add_topic(request):
     try:
         # GETは拒否
@@ -110,11 +146,46 @@ def add_topic(request):
         if edit_authentication is None:
             return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "403"})
     
-        # コメントを追加する
+        # トピックを追加する
         topic = GroupTopic()
         topic.group = target_group
         topic.topic_name = form.cleaned_data["topic_name"]
         topic.is_not_belong_viewable = form.cleaned_data["free_viewable"] == "1"
+        topic.save()
+
+        return apiutil.convert_json_result(request, {"Result": "OK", "ErrorCode": "200"})
+    except Exception as e:
+        print(e)
+        return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "500"})
+
+def delete_topic(request):
+    try:
+        # GETは拒否
+        if request.method != "POST":
+            return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "405"})
+
+        # 未ログインは拒否
+        user = request.user
+        if not user.is_authenticated:
+            return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "401"})
+        
+        # フォームを取得
+        form = GroupTopicDeleteForm(request.POST)
+        if not form.is_valid():
+            return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "403"})
+
+        # 対象のトピックを取得
+        topic = GroupTopic.objects.get_or_none(id=form.cleaned_data["topic_id"], is_delete=False)
+        if topic is None:
+            return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "404"})
+
+        # 編集権限のチェック
+        edit_authentication = AttributeGroupInfo.objects.get_or_none(user=user, group=topic.group, authentication=0)
+        if edit_authentication is None:
+            return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "403"})
+    
+        # トピックを消す
+        topic.is_delete = True
         topic.save()
 
         return apiutil.convert_json_result(request, {"Result": "OK", "ErrorCode": "200"})
