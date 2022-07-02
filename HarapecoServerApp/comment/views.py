@@ -2,7 +2,7 @@ from django.shortcuts import render
 from .models import UserComment, GroupTopic, GroupTopicComment
 from app.models import User, UserManager, Group, AttributeGroupInfo
 from util import apiutil, util
-from .forms import CommentCreationForm, GroupTopicCreationForm, GroupTopicCommentCreationForm, GroupTopicCommentEditForm, GroupTopicEditForm, GroupTopicDeleteForm
+from .forms import CommentCreationForm, GroupTopicCreationForm, GroupTopicCommentCreationForm, GroupTopicCommentEditForm, GroupTopicEditForm, GroupTopicDeleteForm, CommentDeleteForm
 from django.utils import timezone
 
 # Create your views here.
@@ -33,6 +33,40 @@ def user_comment_submit(request):
         comment.submit_user = target_user
         comment.text = form.cleaned_data["text"]
         comment.save()
+
+        return apiutil.convert_json_result(request, {"Result": "OK", "ErrorCode": "200"})
+    except Exception as e:
+        print(e)
+        return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "500"})
+
+def user_comment_delete(request):
+    try:
+        # GETは拒否
+        if request.method != "POST":
+            return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "405"})
+
+        # 未ログインは拒否
+        user = request.user
+        if not user.is_authenticated:
+            return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "401"})
+        
+        # フォームを取得
+        form = CommentDeleteForm(request.POST)
+        if not form.is_valid():
+            return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "403"})
+
+        # 投稿コメントを特定する
+        target_comment = UserComment.objects.get_or_none(id=form.cleaned_data["id"], is_delete=False)
+        if target_comment is None:
+            return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "404"})
+
+        # 投稿ユーザーor送信先ユーザーのいずれも満たさない場合はNG
+        if not (target_comment.user == user or target_comment.submit_user == user):
+            return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "403"})
+
+        # コメントを追加する
+        target_comment.is_delete = True
+        target_comment.save()
 
         return apiutil.convert_json_result(request, {"Result": "OK", "ErrorCode": "200"})
     except Exception as e:
