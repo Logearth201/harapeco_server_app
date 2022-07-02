@@ -289,7 +289,8 @@ def group_topic_comment(request, group_topic_id, offset):
             user = request.user
             if not user.is_authenticated:
                 return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "401"})
-
+            
+            # 所属してなければ拒否
             edit_authentication = AttributeGroupInfo.objects.get_or_none(user=user, group=group_topic.group)
             if edit_authentication is None:
                 return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "403"})
@@ -336,6 +337,11 @@ def group_topic_comment_edit(request):
         comment = GroupTopicComment.objects.get_or_none(id=form.cleaned_data["group_topic_comment_id"], is_delete=False)
         if comment is None:
             return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "404"})
+
+        # グループに属していない場合は削除不可
+        edit_authentication = AttributeGroupInfo.objects.get_or_none(user=user, group=comment.topic.group)
+        if edit_authentication is None:
+            return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "403"})
         
         # ユーザーIDが不一致ならエラー
         if comment.fromuser.id != user.id:
@@ -345,6 +351,46 @@ def group_topic_comment_edit(request):
         comment.is_edit = True
         comment.text = form.cleaned_data["text"]
         comment.date_edited = timezone.now()
+        comment.save()
+
+        return apiutil.convert_json_result(request, {"Result": "OK", "ErrorCode": "200"})
+    except Exception as e:
+        print(e)
+        return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "500"})
+
+def group_topic_comment_delete(request):
+    try:
+        # GETは拒否
+        if request.method != "POST":
+            return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "405"})
+
+        # 未ログインは拒否
+        user = request.user
+        if not user.is_authenticated:
+            return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "401"})
+        
+        # フォームを取得
+        form = GroupTopicCommentEditForm(request.POST)
+        if not form.is_valid():
+            return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "403"})
+        
+        # 編集対象のコメントを特定する
+        comment = GroupTopicComment.objects.get_or_none(id=form.cleaned_data["group_topic_comment_id"], is_delete=False)
+        if comment is None:
+            return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "404"})
+
+        # グループに属していない場合は削除不可
+        edit_authentication = AttributeGroupInfo.objects.get_or_none(user=user, group=comment.topic.group)
+        if edit_authentication is None:
+            return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "403"})
+        
+        # ユーザーIDが不一致なら、グループに関する管理者権限を探す。リーダーかどうかも見る。
+        # それも満たさなければ削除させない。
+        if comment.fromuser.id != user.id and edit_authentication.authentication != 0:
+            return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "403"})
+    
+        # コメントを編集する
+        comment.is_delete = True
         comment.save()
 
         return apiutil.convert_json_result(request, {"Result": "OK", "ErrorCode": "200"})

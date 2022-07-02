@@ -13,4 +13,5 @@ urlpatterns = [
     path('group/topic/delete', views.delete_topic, name='delete_topic'),
     path('group/topic/comment/submit', views.group_topic_comment_submit, name='group_topic_comment_submit'),
     path('group/topic/comment/edit', views.group_topic_comment_edit, name='group_topic_comment_edit'),
+    path('group/topic/comment/delete', views.group_topic_comment_delete, name='group_topic_comment_delete'),
 ]
