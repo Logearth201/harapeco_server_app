@@ -4,6 +4,7 @@ from comment import views
 urlpatterns = [
     path('user/comment/submit', views.user_comment_submit, name='user_comment_submit'),
     path('user/comment/delete', views.user_comment_delete, name='user_comment_delete'),
+    path('user/comment/evaluate', views.user_comment_evaluate, name='user_comment_evaluate'),
     path('user/get/<slug:user_id>', views.get_user_comment, name='get_user_comment'),
     path('group/topic/get/<slug:group_id>', views.get_group_topics, name='get_group_topics'),
     path('group/topic/comments/<slug:group_topic_id>', views.group_topic_comment_nonoffset, name='group_topic_comment_nonoffset'),

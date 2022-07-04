@@ -13,6 +13,19 @@ class UserComment(models.Model):
     bad_cnt = models.IntegerField(default=0)
     is_delete = models.BooleanField(default=False)
 
+class UserCommentEvaluate(models.Model):
+    objects = BaseManager()
+    user_comment = models.ForeignKey(UserComment, on_delete=models.CASCADE, related_name="UserCommentEvaluate_userComment")
+    is_good = models.BooleanField()
+    user = models.ForeignKey("app.User", on_delete=models.CASCADE, related_name="UserCommentEvaluate_user")
+
+    constraints = [
+        models.UniqueConstraint(
+            fields=["user_comment", "user"],
+            name="user_comment_user_unique"
+            )
+        ]
+
 class GroupTopic(models.Model):
     objects = BaseManager()
     topic_name = models.CharField(max_length=100)

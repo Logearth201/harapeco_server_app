@@ -7,6 +7,10 @@ class CommentCreationForm(forms.Form):
 class CommentDeleteForm(forms.Form):
     id = forms.IntegerField()
 
+class CommentEvaluateForm(forms.Form):
+    user_comment_id = forms.IntegerField()
+    score = forms.CharField(max_length=2) # 1：高評価、-1：低評価、0：削除
+
 class GroupTopicCreationForm(forms.Form):
     topic_name = forms.CharField(max_length=100)
     group_id = forms.IntegerField()

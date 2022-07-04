@@ -1,8 +1,8 @@
 from django.shortcuts import render
-from .models import UserComment, GroupTopic, GroupTopicComment, GroupTopicCommentEvaluate
+from .models import UserComment, GroupTopic, GroupTopicComment, GroupTopicCommentEvaluate, UserCommentEvaluate
 from app.models import User, UserManager, Group, AttributeGroupInfo
 from util import apiutil, util
-from .forms import CommentCreationForm, GroupTopicCreationForm, GroupTopicCommentCreationForm, GroupTopicCommentEditForm, GroupTopicEditForm, GroupTopicDeleteForm, CommentDeleteForm, GroupTopicCommentEvaluateForm
+from .forms import CommentCreationForm, GroupTopicCreationForm, GroupTopicCommentCreationForm, GroupTopicCommentEditForm, GroupTopicEditForm, GroupTopicDeleteForm, CommentDeleteForm, GroupTopicCommentEvaluateForm, CommentEvaluateForm
 from django.utils import timezone
 from django.db import transaction
 
@@ -94,6 +94,99 @@ def get_user_comment(request, user_id):
                 })
 
         return apiutil.convert_json_result(request, {"Result": "OK", "ErrorCode": "200", "Comments": comments_obj})
+    except Exception as e:
+        print(e)
+        return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "500"})
+
+def user_comment_evaluate(request):
+    try:
+        # GETは拒否
+        if request.method != "POST":
+            return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "405"})
+
+        # 未ログインは拒否
+        user = request.user
+        if not user.is_authenticated:
+            return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "401"})
+        
+        # フォームを取得
+        form = CommentEvaluateForm(request.POST)
+        if not form.is_valid():
+            return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "403"})
+
+        # セットする評価内容
+        score = form.cleaned_data["score"]
+
+        # 編集対象のコメントを特定する
+        comment = UserComment.objects.get_or_none(id=form.cleaned_data["user_comment_id"], is_delete=False)
+        if comment is None:
+            return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "404"})
+        
+        # トランザクション
+        transaction.set_autocommit(False)
+
+        try:
+            # 条件によって評価を変える
+            evaluate = UserCommentEvaluate.objects.get_or_none(user=user, user_comment=comment)
+            if evaluate is None:
+                # スコアオブジェクト
+                if score != "0":
+                    evaluate = UserCommentEvaluate()
+                    if score == "1":
+                        evaluate.is_good = True
+                    else:
+                        evaluate.is_good = False
+                    evaluate.user_comment = comment
+                    evaluate.user = user
+                    evaluate.save()
+
+                # 点数評価（追加されたので）
+                if score == "1":
+                    comment.good_cnt += 1
+                    comment.save()
+                elif score == "-1":
+                    comment.bad_cnt += 1
+                    comment.save()
+            else:
+                # 事前評価を保存
+                before_evaluate = evaluate.is_good
+
+                if score == "1":
+                    evaluate.is_good = True
+                    evaluate.save()
+                elif score == "0":
+                    evaluate.delete()
+                else:
+                    evaluate.is_good = False
+                    evaluate.save()
+
+                # 事前評価と比較
+                if score != "0":
+                    if before_evaluate != evaluate.is_good:
+                        if score == "1":
+                            comment.good_cnt += 1
+                            comment.bad_cnt -= 1
+                            comment.save()
+                        elif score == "-1":
+                            comment.good_cnt -= 1
+                            comment.bad_cnt += 1
+                            comment.save()
+                else:
+                    if before_evaluate:
+                        comment.good_cnt -= 1
+                        comment.save()
+                    else:
+                        comment.bad_cnt -= 1
+                        comment.save()
+        except Exception as e:
+            print(e)
+            transaction.rollback()
+            return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "500"})
+        finally:
+            transaction.commit()
+            transaction.set_autocommit(True)
+        
+        return apiutil.convert_json_result(request, {"Result": "OK", "ErrorCode": "200"})
     except Exception as e:
         print(e)
         return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "500"})
