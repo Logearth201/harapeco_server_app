@@ -32,3 +32,15 @@ class GroupTopicComment(models.Model):
     date_submited = models.DateTimeField("date_submited", default=timezone.now)
     date_edited = models.DateTimeField("date_edited", default=timezone.now)
 
+class GroupTopicCommentEvaluate(models.Model):
+    objects = BaseManager()
+    group_topic_comment = models.ForeignKey(GroupTopicComment, on_delete=models.CASCADE, related_name="GroupTopicCommentEvaluate_groupTopicComment")
+    is_good = models.BooleanField()
+    user = models.ForeignKey("app.User", on_delete=models.CASCADE, related_name="GroupTopicCommentEvaluate_user")
+
+    constraints = [
+        models.UniqueConstraint(
+            fields=["group_topic_comment", "user"],
+            name="group_topic_comment_user_unique"
+            )
+        ]

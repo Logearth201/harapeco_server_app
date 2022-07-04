@@ -27,3 +27,7 @@ class GroupTopicCommentCreationForm(forms.Form):
 class GroupTopicCommentEditForm(forms.Form):
     text = forms.CharField(max_length=4000)
     group_topic_comment_id = forms.IntegerField()
+
+class GroupTopicCommentEvaluateForm(forms.Form):
+    group_topic_comment_id = forms.IntegerField()
+    score = forms.CharField(max_length=2) # 1：高評価、-1：低評価、0：削除

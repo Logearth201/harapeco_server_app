@@ -1,9 +1,10 @@
 from django.shortcuts import render
-from .models import UserComment, GroupTopic, GroupTopicComment
+from .models import UserComment, GroupTopic, GroupTopicComment, GroupTopicCommentEvaluate
 from app.models import User, UserManager, Group, AttributeGroupInfo
 from util import apiutil, util
-from .forms import CommentCreationForm, GroupTopicCreationForm, GroupTopicCommentCreationForm, GroupTopicCommentEditForm, GroupTopicEditForm, GroupTopicDeleteForm, CommentDeleteForm
+from .forms import CommentCreationForm, GroupTopicCreationForm, GroupTopicCommentCreationForm, GroupTopicCommentEditForm, GroupTopicEditForm, GroupTopicDeleteForm, CommentDeleteForm, GroupTopicCommentEvaluateForm
 from django.utils import timezone
+from django.db import transaction
 
 # Create your views here.
 def user_comment_submit(request):
@@ -393,6 +394,104 @@ def group_topic_comment_delete(request):
         comment.is_delete = True
         comment.save()
 
+        return apiutil.convert_json_result(request, {"Result": "OK", "ErrorCode": "200"})
+    except Exception as e:
+        print(e)
+        return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "500"})
+
+def group_topic_comment_evaluate(request):
+    try:
+        # GETは拒否
+        if request.method != "POST":
+            return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "405"})
+
+        # 未ログインは拒否
+        user = request.user
+        if not user.is_authenticated:
+            return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "401"})
+        
+        # フォームを取得
+        form = GroupTopicCommentEvaluateForm(request.POST)
+        if not form.is_valid():
+            return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "403"})
+
+        # セットする評価内容
+        score = form.cleaned_data["score"]
+
+        # 編集対象のコメントを特定する
+        comment = GroupTopicComment.objects.get_or_none(id=form.cleaned_data["group_topic_comment_id"], is_delete=False)
+        if comment is None:
+            return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "404"})
+        
+        # グループに属していない場合は編集不可
+        edit_authentication = AttributeGroupInfo.objects.get_or_none(user=user, group=comment.topic.group)
+        if edit_authentication is None:
+            return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "403"})
+        
+        # トランザクション
+        transaction.set_autocommit(False)
+
+        try:
+            # 条件によって評価を変える
+            evaluate = GroupTopicCommentEvaluate.objects.get_or_none(user=user, group_topic_comment=comment)
+            if evaluate is None:
+                # スコアオブジェクト
+                if score != "0":
+                    evaluate = GroupTopicCommentEvaluate()
+                    if score == "1":
+                        evaluate.is_good = True
+                    else:
+                        evaluate.is_good = False
+                    evaluate.group_topic_comment = comment
+                    evaluate.user = user
+                    evaluate.save()
+
+                # 点数評価（追加されたので）
+                if score == "1":
+                    comment.good_cnt += 1
+                    comment.save()
+                elif score == "-1":
+                    comment.bad_cnt += 1
+                    comment.save()
+            else:
+                # 事前評価を保存
+                before_evaluate = evaluate.is_good
+
+                if score == "1":
+                    evaluate.is_good = True
+                    evaluate.save()
+                elif score == "0":
+                    evaluate.delete()
+                else:
+                    evaluate.is_good = False
+                    evaluate.save()
+
+                # 事前評価と比較
+                if score != "0":
+                    if before_evaluate != evaluate.is_good:
+                        if score == "1":
+                            comment.good_cnt += 1
+                            comment.bad_cnt -= 1
+                            comment.save()
+                        elif score == "-1":
+                            comment.good_cnt -= 1
+                            comment.bad_cnt += 1
+                            comment.save()
+                else:
+                    if before_evaluate:
+                        comment.good_cnt -= 1
+                        comment.save()
+                    else:
+                        comment.bad_cnt -= 1
+                        comment.save()
+        except Exception as e:
+            print(e)
+            transaction.rollback()
+            return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "500"})
+        finally:
+            transaction.commit()
+            transaction.set_autocommit(True)
+        
         return apiutil.convert_json_result(request, {"Result": "OK", "ErrorCode": "200"})
     except Exception as e:
         print(e)
