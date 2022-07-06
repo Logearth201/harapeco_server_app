@@ -26,6 +26,7 @@ urlpatterns = [
          name='login'),
     path('logout/', LogoutView.as_view(next_page='/'), name='logout'),
     path('comment/', include("comment.urls")),
+    path('item/', include("item.urls")),
     path('admin/', admin.site.urls),
     path('signout', views.user_logout, name='user_logout'),
     path('signin/begin', views.prepare_login_api, name='prepare_login_api'),

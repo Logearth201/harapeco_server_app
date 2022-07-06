@@ -58,6 +58,16 @@
     </Compile>
     <Compile Include="comment\views.py" />
     <Compile Include="comment\__init__.py" />
+    <Compile Include="item\admin.py" />
+    <Compile Include="item\apps.py" />
+    <Compile Include="item\migrations\__init__.py" />
+    <Compile Include="item\models.py" />
+    <Compile Include="item\tests.py" />
+    <Compile Include="item\urls.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="item\views.py" />
+    <Compile Include="item\__init__.py" />
     <Compile Include="manage.py" />
     <Compile Include="HarapecoServerApp\__init__.py" />
     <Compile Include="HarapecoServerApp\settings.py" />
@@ -85,11 +95,16 @@
     <Folder Include="comment\templates\" />
     <Folder Include="comment\templates\comment\" />
     <Folder Include="HarapecoServerApp\" />
+    <Folder Include="item\" />
+    <Folder Include="item\migrations\" />
+    <Folder Include="item\templates\" />
+    <Folder Include="item\templates\item\" />
     <Folder Include="util\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="app\ErrorMemo.txt" />
     <Content Include="comment\templates\comment\index.html" />
+    <Content Include="item\templates\item\index.html" />
     <Content Include="requirements.txt" />
     <Content Include="db.sqlite3" />
     <Content Include="app\static\app\content\bootstrap.css" />

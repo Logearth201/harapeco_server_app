@@ -38,7 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    "comment.apps.commentConfig"
+    "comment.apps.commentConfig",
+    "item.apps.itemConfig",
 ]
 
 # Middleware framework
