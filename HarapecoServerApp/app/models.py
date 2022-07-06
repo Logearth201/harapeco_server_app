@@ -70,6 +70,9 @@ class User(AbstractBaseUser, PermissionsMixin):
     EMAIL_FIELD = "email"
     REQUIRED_FIELDS = []
 
+    def __str__(self):
+        return self.username
+
     class Meta:
         verbose_name = "user"
         verbose_name_plural = "users"
@@ -82,12 +85,18 @@ class Group(models.Model):
     is_delete = models.BooleanField(default=False)
     auto_belong_group = models.BooleanField(default=False)
 
+    def __str__(self):
+        return self.name
+
 class AttributeGroupInfo(models.Model):
     objects = BaseManager()
     user = models.ForeignKey("app.User", on_delete=models.CASCADE)
     group = models.ForeignKey("app.Group", on_delete=models.CASCADE)
     authentication = models.IntegerField(default=1) # 0：リーダー、1：一般ユーザー
     group_join_waitconfirm = models.BooleanField(default=False)
+
+    def __str__(self):
+        return "User = " + self.user.username + ', Group = ' + self.group.name + " as " + str(self.authentication)
 
 class MailInformation(models.Model):
     objects = BaseManager()

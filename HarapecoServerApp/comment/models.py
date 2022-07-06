@@ -12,6 +12,11 @@ class UserComment(models.Model):
     good_cnt = models.IntegerField(default=0)
     bad_cnt = models.IntegerField(default=0)
     is_delete = models.BooleanField(default=False)
+    date_submited = models.DateTimeField("date_submited", default=timezone.now)
+    date_edited = models.DateTimeField("date_edited", default=timezone.now)
+
+    def __str__(self):
+        return self.user.username + '<=' + self.submit_user.username + ":" + self.text[0:20]
 
 class UserCommentEvaluate(models.Model):
     objects = BaseManager()
