@@ -43,7 +43,6 @@ def create_message(str, list):
     order = -1
 
     for item in list:
-        # 数値じゃないなんてこんなの、加奈ちゃんじゃない！
         if not re.match(r'^[0-9]]$', item.number):
             continue
 

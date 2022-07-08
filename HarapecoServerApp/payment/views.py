@@ -58,3 +58,6 @@ def get_buy_menu(request, platform_id):
     except Exception as e:
         print(e)
         return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "500"})
+
+def payload_google_play(request):
+    pass

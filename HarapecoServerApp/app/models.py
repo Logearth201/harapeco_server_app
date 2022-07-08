@@ -123,3 +123,17 @@ class ProcessSaver(models.Model):
     process_type = models.CharField(max_length=15)
     data = models.CharField(max_length=4000)
     password = models.CharField(max_length=100)
+
+# 招待コード
+class Invitation(models.Model):
+    objects = BaseManager()
+    inviter_user = models.ForeignKey(
+        User, on_delete=models.CASCADE
+    )
+    invite_token = models.CharField(max_length=100)
+    is_valid = models.BooleanField(default=True)
+    date_add = models.DateTimeField("date_joined", default=timezone.now)
+
+    indexes = [
+        models.Index(fields=['is_valid', 'date_add']),
+    ]

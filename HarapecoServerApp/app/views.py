@@ -1,16 +1,12 @@
-"""
-Definition of views.
-"""
-
 from time import process_time
 from django.shortcuts import render, redirect, get_object_or_404, \
     get_list_or_404, Http404, HttpResponse
-import json
+import json, base64
 from datetime import datetime, timedelta
 from django.contrib.auth import login, authenticate, logout
 from django.db import transaction
 from django.http import HttpRequest
-from .models import User, UserManager, Group, AttributeGroupInfo, MailInformation, UserDeviceLogin, ProcessSaver
+from .models import User, UserManager, Group, AttributeGroupInfo, MailInformation, UserDeviceLogin, ProcessSaver, Invitation
 from .forms import MailInformationForm, RegisterCompleteForm, SetTemporaryPassForm, UserLoginForm, AutoLoginForm, UserLogoutForm, UserInfoChangeForm, UserInfoChangeCompleteForm
 from util import apiutil, util
 
@@ -453,3 +449,30 @@ def user_modify_end(request):
         transaction.set_autocommit(True)
 
     return apiutil.convert_json_result(request, {"Result": "OK", "ErrorCode": "200"})
+
+# ユーザー登録
+def invitation_create(request):
+    try:
+        # 現在のユーザーの取得
+        user = request.user
+        if not user.is_authenticated:
+            return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "401"})
+        
+        # invitationの追加
+        # ※batchにより定期的に消されることを想定
+        invitation = Invitation()
+        invitation.inviter_user = user
+        invitation.invite_token = util.randomname(15)
+        invitation.save()
+
+        # 招待コード(ID + USERID + TOKEN)を返す。これはbase64.b64decodeで復元可能。
+        token = base64.b64encode((str(invitation.id) + "_" + str(invitation.inviter_user.id) + "_" + invitation.invite_token).encode())
+        return apiutil.convert_json_result(request, {"Result": "OK", "ErrorCode": "200", "InvitationToken": token.decode()})
+    except Exception as e:
+        print(e)
+        transaction.rollback()
+        return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "500"})
+    finally:
+        transaction.commit()
+        transaction.set_autocommit(True)
+    
