@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     "comment.apps.commentConfig",
     "item.apps.itemConfig",
+    "payment.apps.paymentConfig",
 ]
 
 # Middleware framework

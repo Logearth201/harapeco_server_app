@@ -73,6 +73,16 @@
     <Compile Include="HarapecoServerApp\settings.py" />
     <Compile Include="HarapecoServerApp\urls.py" />
     <Compile Include="HarapecoServerApp\wsgi.py" />
+    <Compile Include="payment\admin.py" />
+    <Compile Include="payment\apps.py" />
+    <Compile Include="payment\migrations\__init__.py" />
+    <Compile Include="payment\models.py" />
+    <Compile Include="payment\tests.py" />
+    <Compile Include="payment\urls.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="payment\views.py" />
+    <Compile Include="payment\__init__.py" />
     <Compile Include="util\apiutil.py">
       <SubType>Code</SubType>
     </Compile>
@@ -99,12 +109,17 @@
     <Folder Include="item\migrations\" />
     <Folder Include="item\templates\" />
     <Folder Include="item\templates\item\" />
+    <Folder Include="payment\" />
+    <Folder Include="payment\migrations\" />
+    <Folder Include="payment\templates\" />
+    <Folder Include="payment\templates\payment\" />
     <Folder Include="util\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="app\ErrorMemo.txt" />
     <Content Include="comment\templates\comment\index.html" />
     <Content Include="item\templates\item\index.html" />
+    <Content Include="payment\templates\payment\index.html" />
     <Content Include="requirements.txt" />
     <Content Include="db.sqlite3" />
     <Content Include="app\static\app\content\bootstrap.css" />
