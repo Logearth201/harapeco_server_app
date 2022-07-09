@@ -7,7 +7,7 @@ from django.contrib.auth import login, authenticate, logout
 from django.db import transaction
 from django.http import HttpRequest
 from .models import User, UserManager, Group, AttributeGroupInfo, MailInformation, UserDeviceLogin, ProcessSaver, Invitation
-from .forms import MailInformationForm, RegisterCompleteForm, SetTemporaryPassForm, UserLoginForm, AutoLoginForm, UserLogoutForm, UserInfoChangeForm, UserInfoChangeCompleteForm
+from .forms import MailInformationForm, RegisterCompleteForm, SetTemporaryPassForm, UserLoginForm, AutoLoginForm, UserLogoutForm, UserInfoChangeForm, UserInfoChangeCompleteForm, InviteTokenForm
 from util import apiutil, util
 
 def home(request):
@@ -314,7 +314,7 @@ def user_modify_begin(request):
     # 現在のユーザーの取得
     user = request.user
     if not user.is_authenticated:
-        return HttpResponse(json.dumps({"Result": "NG", "errorCode": "401"}))
+        return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "401"})
     
     # パスコードを発行
     pass1_1 = util.randomname(10)  # アプリを通して渡されます。
@@ -475,4 +475,57 @@ def invitation_create(request):
     finally:
         transaction.commit()
         transaction.set_autocommit(True)
-    
+   
+def invitation_record(request):
+    try:
+        # POST以外は禁止に
+        if request.method != 'POST':
+            return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "405"})
+
+        # フォームを取得
+        form = InviteTokenForm(request.POST)
+        if not form.is_valid():
+            return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "403"})
+
+        # 現在のユーザーの取得
+        user = request.user
+        if not user.is_authenticated:
+            return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "401"})
+
+        # TODO：作りかけです。
+        # sessionに招待コードを記録させる
+        # note:ロードバランサーによるサーバー切り替えは想定しないこと。
+        # note2:形式ミスや発行コードミスはエラーにすること。
+        try:
+            token = base64.b64decode(form.cleaned_data["token"].encode()).decode()
+        except:
+            return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "400"})
+        
+        spliter = token.split("_")
+        if len(token.split("_")) != 3:
+            return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "400"})
+
+        invitation_id = spliter[0]
+        user_id = spliter[1]
+        invitation_token = spliter[2]
+
+        invitation = Invitation.objects.get_or_none(id=invitation_id)
+        if invitation is None:
+            return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "404"})
+        elif invitation.invite_token != invitation_token or str(invitation.inviter_user.id) != user_id:
+            return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "400"})
+
+        # 以降、招待コード情報を適用させる
+
+
+        # 成功したら招待コードを削除
+        invitation.delete()
+        
+        return apiutil.convert_json_result(request, {"Result": "OK", "ErrorCode": "200"})
+    except Exception as e:
+        print(e)
+        transaction.rollback()
+        return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "500"})
+    finally:
+        transaction.commit()
+        transaction.set_autocommit(True)

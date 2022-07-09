@@ -63,3 +63,6 @@ class UserInfoChangeForm(forms.Form):
 
 class UserInfoChangeCompleteForm(forms.Form):
     password = forms.CharField(max_length=50)
+
+class InviteTokenForm(forms.Form):
+    token = forms.CharField(max_length=100)
