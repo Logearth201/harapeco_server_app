@@ -475,8 +475,8 @@ def invitation_create(request):
     finally:
         transaction.commit()
         transaction.set_autocommit(True)
-   
-def invitation_record(request):
+
+def invitation_apply_afterinput(request):
     try:
         # POST以外は禁止に
         if request.method != 'POST':
@@ -526,6 +526,54 @@ def invitation_record(request):
         print(e)
         transaction.rollback()
         return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "500"})
+    finally:
+        transaction.commit()
+        transaction.set_autocommit(True)
+
+
+# token入力 => after token input, redirect to page.
+def invitation_record(request, input_token):
+    try:
+        # GET以外は禁止に
+        if request.method != 'GET':
+            return apiutil.convert_http_result(request, {"Result": "NG", "ErrorCode": "405"})
+        
+        # 現在のユーザーの取得
+        user = request.user
+        if user.is_authenticated:
+            return apiutil.convert_http_result(request, {"Result": "NG", "ErrorCode": "403"})
+
+        # TODO：作りかけです。
+        # sessionに招待コードを記録させる
+        # note:ロードバランサーによるサーバー切り替えは想定しないこと。
+        # note2:形式ミスや発行コードミスはエラーにすること。
+        try:
+            token = base64.b64decode(input_token.encode()).decode()
+        except:
+            return apiutil.convert_http_result(request, {"Result": "NG", "ErrorCode": "400"})
+        
+        spliter = token.split("_")
+        if len(token.split("_")) != 3:
+            return apiutil.convert_http_result(request, {"Result": "NG", "ErrorCode": "400"})
+
+        invitation_id = spliter[0]
+        user_id = spliter[1]
+        invitation_token = spliter[2]
+
+        invitation = Invitation.objects.get_or_none(id=invitation_id)
+        if invitation is None:
+            return apiutil.convert_http_result(request, {"Result": "NG", "ErrorCode": "404"})
+        elif invitation.invite_token != invitation_token or str(invitation.inviter_user.id) != user_id:
+            return apiutil.convert_http_result(request, {"Result": "NG", "ErrorCode": "400"})
+
+        # セッションに招待コードを記録する
+        request.session["invite_token"] = token
+        
+        return apiutil.convert_http_result(request, {"Result": "OK", "ErrorCode": "200"})
+    except Exception as e:
+        print(e)
+        transaction.rollback()
+        return apiutil.convert_http_result(request, {"Result": "NG", "ErrorCode": "500"})
     finally:
         transaction.commit()
         transaction.set_autocommit(True)

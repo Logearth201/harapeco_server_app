@@ -32,6 +32,7 @@ urlpatterns = [
     path('signout', views.user_logout, name='user_logout'),
     path('invitation/create', views.invitation_create, name='invitation_create'),
     path('invitation/record', views.invitation_record, name='invitation_record'),
+    path('invitation/apply/afterinput', views.invitation_apply_afterinput, name='invitation_apply_afterinput'),
     path('signin/begin', views.prepare_login_api, name='prepare_login_api'),
     path('signin/end', views.end_login_api, name='end_login_api'),
     path('signin/auto', views.auto_login, name='auto_login'),
