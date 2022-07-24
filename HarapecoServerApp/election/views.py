@@ -32,5 +32,23 @@ def get_can_election_list(request):
         print(e)
         return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "500"})
     
-def get_electionunit_candidate(request):
-    pass
+def get_election_unit_candidate(request, election_unit_id):
+    try:
+        # 現在のユーザーの取得
+        user = request.user
+        if not user.is_authenticated:
+            return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "401"})
+
+        candidates_obj = []
+        candidates = ElectionCandidate.objects.filter(election_unit__id=election_unit_id)
+        for candidate in candidates:
+            candidates_obj.append({
+                "ID": candidate.id,
+                "Name": candidate.name,
+                })
+
+        return apiutil.convert_json_result(request, {"Result": "OK", "ErrorCode": "200", "Candidates": candidates_obj})
+    
+    except Exception as e:
+        print(e)
+        return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "500"})
