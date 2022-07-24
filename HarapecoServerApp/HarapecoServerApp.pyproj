@@ -67,6 +67,13 @@
     </Compile>
     <Compile Include="comment\views.py" />
     <Compile Include="comment\__init__.py" />
+    <Compile Include="election\admin.py" />
+    <Compile Include="election\apps.py" />
+    <Compile Include="election\migrations\__init__.py" />
+    <Compile Include="election\models.py" />
+    <Compile Include="election\tests.py" />
+    <Compile Include="election\views.py" />
+    <Compile Include="election\__init__.py" />
     <Compile Include="item\admin.py" />
     <Compile Include="item\apps.py" />
     <Compile Include="item\migrations\__init__.py" />
@@ -115,6 +122,10 @@
     <Folder Include="comment\migrations\" />
     <Folder Include="comment\templates\" />
     <Folder Include="comment\templates\comment\" />
+    <Folder Include="election\" />
+    <Folder Include="election\migrations\" />
+    <Folder Include="election\templates\" />
+    <Folder Include="election\templates\election\" />
     <Folder Include="HarapecoServerApp\" />
     <Folder Include="item\" />
     <Folder Include="item\migrations\" />
@@ -129,6 +140,7 @@
   <ItemGroup>
     <Content Include="app\ErrorMemo.txt" />
     <Content Include="comment\templates\comment\index.html" />
+    <Content Include="election\templates\election\index.html" />
     <Content Include="item\templates\item\index.html" />
     <Content Include="payment\templates\payment\index.html" />
     <Content Include="requirements.txt" />

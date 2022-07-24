@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "comment.apps.commentConfig",
     "item.apps.itemConfig",
     "payment.apps.paymentConfig",
+    "election.apps.electionConfig",
 ]
 
 # Middleware framework

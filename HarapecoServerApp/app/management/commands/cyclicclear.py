@@ -3,6 +3,7 @@ from app.models import Group, User
 from comment.models import UserComment, GroupTopic, GroupTopicComment
 
 # python manage.py cyclicclearで起動、古いデータを捨てる
+# 1か月ごとに実行する
 class Command(BaseCommand):
     def handle(self, *args, **options):
         Group.objects.filter(is_delete=True).delete()
@@ -10,3 +11,4 @@ class Command(BaseCommand):
         UserComment.objects.filter(is_delete=True).delete()
         GroupTopic.objects.filter(is_delete=True).delete()
         GroupTopicComment.objects.filter(is_delete=True).delete()
+
