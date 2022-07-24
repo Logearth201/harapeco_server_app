@@ -72,6 +72,9 @@
     <Compile Include="election\migrations\__init__.py" />
     <Compile Include="election\models.py" />
     <Compile Include="election\tests.py" />
+    <Compile Include="election\urls.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="election\views.py" />
     <Compile Include="election\__init__.py" />
     <Compile Include="item\admin.py" />
