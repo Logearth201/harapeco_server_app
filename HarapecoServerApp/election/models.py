@@ -1,3 +1,4 @@
+from email.policy import default
 from django.db import models
 from app.models import User, BaseManager
 
@@ -17,6 +18,7 @@ class ElectionCandidate(models.Model):
     objects = BaseManager()
     name = models.CharField(max_length=100)
     election_unit = models.ForeignKey(ElectionUnit, on_delete=models.CASCADE, related_name="ElectionCandidate_election_unit")
+    final_get_submits = models.BigIntegerField(default=0) # at last, this record can be counted election votes.
 
 class ElectionUserSubmit(models.Model):
     objects = BaseManager()
