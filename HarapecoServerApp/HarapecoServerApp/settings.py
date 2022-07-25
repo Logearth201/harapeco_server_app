@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "item.apps.itemConfig",
     "payment.apps.paymentConfig",
     "election.apps.electionConfig",
+    "rootbox.apps.rootboxConfig",
 ]
 
 # Middleware framework

@@ -105,6 +105,16 @@
     </Compile>
     <Compile Include="payment\views.py" />
     <Compile Include="payment\__init__.py" />
+    <Compile Include="rootbox\admin.py" />
+    <Compile Include="rootbox\apps.py" />
+    <Compile Include="rootbox\migrations\__init__.py" />
+    <Compile Include="rootbox\models.py" />
+    <Compile Include="rootbox\tests.py" />
+    <Compile Include="rootbox\util.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="rootbox\views.py" />
+    <Compile Include="rootbox\__init__.py" />
     <Compile Include="util\apiutil.py">
       <SubType>Code</SubType>
     </Compile>
@@ -141,6 +151,10 @@
     <Folder Include="payment\migrations\" />
     <Folder Include="payment\templates\" />
     <Folder Include="payment\templates\payment\" />
+    <Folder Include="rootbox\" />
+    <Folder Include="rootbox\migrations\" />
+    <Folder Include="rootbox\templates\" />
+    <Folder Include="rootbox\templates\rootbox\" />
     <Folder Include="util\" />
   </ItemGroup>
   <ItemGroup>
@@ -179,6 +193,7 @@
     <Content Include="app\templates\app\layout.html" />
     <Content Include="app\templates\app\login.html" />
     <Content Include="app\templates\app\loginpartial.html" />
+    <Content Include="rootbox\templates\rootbox\index.html" />
   </ItemGroup>
   <ItemGroup>
     <None Include="readme.html">
