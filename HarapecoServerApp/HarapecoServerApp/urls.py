@@ -29,6 +29,7 @@ urlpatterns = [
     path('item/', include("item.urls")),
     path('payment/', include("payment.urls")),
     path('election/', include("election.urls")),
+    path('rootbox/', include("rootbox.urls")),
     path('admin/', admin.site.urls),
     path('signout', views.user_logout, name='user_logout'),
     path('invitation/create', views.invitation_create, name='invitation_create'),

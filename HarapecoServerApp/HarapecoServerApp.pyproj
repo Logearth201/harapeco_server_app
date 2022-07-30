@@ -109,7 +109,13 @@
     <Compile Include="rootbox\apps.py" />
     <Compile Include="rootbox\migrations\__init__.py" />
     <Compile Include="rootbox\models.py" />
+    <Compile Include="rootbox\forms.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="rootbox\tests.py" />
+    <Compile Include="rootbox\urls.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="rootbox\util.py">
       <SubType>Code</SubType>
     </Compile>
