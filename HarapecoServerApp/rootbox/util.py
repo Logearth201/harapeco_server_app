@@ -29,3 +29,4 @@ def calculate_rnd_hash(rootbox_items, hash_num):
         ans_base -= rootbox_item.permutation
 
     return -1
+

@@ -51,6 +51,7 @@ def rootbox_draw(request):
         response_json = []
 
         # ガチャを指定した数だけ引かせる
+        # TODO：やることを考えよ！
         for num in range(draw_times):
             rootbox_state.hash_key_index += 1
             rootbox_index = rootboxutil.calculate_rnd_hash(rootbox_items, term.common_prefix_key + rootbox_state.hash_key_usr + str(rootbox_state.hash_key_index))
@@ -60,6 +61,43 @@ def rootbox_draw(request):
 
         # 引く回数状態をセーブ
         rootbox_state.save()
+
+        return apiutil.convert_json_result(request, {"Result": "OK", "ErrorCode": "200", "Data": response_json})
+    
+    except Exception as e:
+        print(e)
+        return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "500"})
+
+def rootbox_drawable_list(request, term_id):
+    try:
+        # 現在のユーザーの取得
+        user = request.user
+        if not user.is_authenticated:
+            return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "401"})
+        
+        # ガチャ種別の取得
+        term = RootBoxTerm.objects.get_or_none(id=term_id)
+        if term is None:
+            return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "404"})
+        
+        # 確率を求めるためのデータを取得
+        rootbox_items = RootBoxItem.objects.filter(term=term)
+        if len(rootbox_items) == 0:
+            return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "404"})
+        
+        # レスポンスJSON
+        response_json = []
+
+        # 確率をセット
+        total_permutation = 0
+        for rootbox_item in rootbox_items:
+            total_permutation += rootbox_item.permutation
+
+        for rootbox_item in rootbox_items:
+            response_json.append({
+                "ID": rootbox_item.id,
+                "Permutation": rootbox_item.permutation / total_permutation
+                })
 
         return apiutil.convert_json_result(request, {"Result": "OK", "ErrorCode": "200", "Data": response_json})
     
