@@ -42,13 +42,18 @@ def rootbox_draw(request):
         if draw_times != 1 and draw_times != 10:
             return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "400"})
 
+        # 確率を求めるためのデータを作成
+        rootbox_items = RootBoxItem.objects.filter(term=term)
+        if len(rootbox_items) == 0:
+            return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "404"})
+        
         # レスポンスJSON
         response_json = []
 
         # ガチャを指定した数だけ引かせる
         for num in range(draw_times):
             rootbox_state.hash_key_index += 1
-            rootbox_index = rootboxutil.calculate_rnd_hash(0, 100, term.common_prefix_key + rootbox_state.hash_key_usr + str(rootbox_state.hash_key_index))
+            rootbox_index = rootboxutil.calculate_rnd_hash(rootbox_items, term.common_prefix_key + rootbox_state.hash_key_usr + str(rootbox_state.hash_key_index))
             response_json.append({
                 "RootBoxValue": rootbox_index,
                 })

@@ -16,8 +16,7 @@ class RootBoxItem(models.Model):
     objects = BaseManager()
     term = models.ForeignKey(RootBoxTerm, on_delete=models.CASCADE)
     event = models.CharField(max_length=500)
-    permutation_from = models.IntegerField()
-    permutation_to = models.IntegerField()
+    permutation = models.IntegerField()
 
 class UserRootBoxState(models.Model):
     objects = BaseManager()
