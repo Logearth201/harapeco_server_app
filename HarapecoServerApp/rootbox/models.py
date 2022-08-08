@@ -1,3 +1,4 @@
+from collections import defaultdict
 from email.policy import default
 from itertools import permutations
 from django.db import models
@@ -22,5 +23,6 @@ class UserRootBoxState(models.Model):
     objects = BaseManager()
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="UserRootBoxState_user")
     term = models.ForeignKey(RootBoxTerm, on_delete=models.CASCADE, related_name="UserRootBoxState_term")
+    index = models.IntegerField()
     hash_key_usr = models.CharField(max_length=100)
     hash_key_index = models.IntegerField(default=0)

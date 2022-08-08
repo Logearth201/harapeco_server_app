@@ -6,7 +6,7 @@ from django.shortcuts import render, HttpResponse
 from util import apiutil, util
 import datetime
 import pytz
-from .forms import RootBoxDrawForm
+from .forms import RootBoxDrawForm, RootBoxSeedSetForm
 
 # from:https://qiita.com/mikage/items/8bd7afbe3300d9e39f90
 def rootbox_draw(request):
@@ -30,12 +30,13 @@ def rootbox_draw(request):
         if term.end_time.replace(tzinfo=pytz.utc) < datetime.datetime.now().replace(tzinfo=pytz.utc) or term.start_time.replace(tzinfo=pytz.utc) > datetime.datetime.now().replace(tzinfo=pytz.utc):
             return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "404"})
 
-        rootbox_state = UserRootBoxState.objects.get_or_none(user=user, term=term)
+        rootbox_state = UserRootBoxState.objects.filter(user=user, term=term).order_by("-index").first()
         if rootbox_state is None:
             rootbox_state = UserRootBoxState()
             rootbox_state.term = term
             rootbox_state.user = user
             rootbox_state.hash_key_usr = util.randomname(100)
+            rootbox_state.index = 0
 
         # 引く回数は1連 or 10連
         draw_times = form.cleaned_data["times"]
@@ -100,6 +101,53 @@ def rootbox_drawable_list(request, term_id):
                 })
 
         return apiutil.convert_json_result(request, {"Result": "OK", "ErrorCode": "200", "Data": response_json})
+    
+    except Exception as e:
+        print(e)
+        return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "500"})
+
+# ガチャの主キーをセットする
+def rootbox_set_seed(request):
+    try:
+        # 現在のユーザーの取得
+        user = request.user
+        if not user.is_authenticated:
+            return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "401"})
+
+        # フォームを取得
+        form = RootBoxSeedSetForm(request.POST)
+        if not form.is_valid():
+            return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "403"})
+
+        # ガチャ種別の取得
+        term = RootBoxTerm.objects.get_or_none(id=form.cleaned_data["term_id"])
+        if term is None:
+            return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "404"})
+
+        # ガチャ種別が引けるかどうかを確認
+        if term.end_time.replace(tzinfo=pytz.utc) < datetime.datetime.now().replace(tzinfo=pytz.utc) or term.start_time.replace(tzinfo=pytz.utc) > datetime.datetime.now().replace(tzinfo=pytz.utc):
+            return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "404"})
+
+        # もう使用されているガチャシードではないことを取得
+        rootbox_state = UserRootBoxState.objects.filter(user=user, term=term, hash_key_usr=form.cleaned_data["hash_key"]).first()
+        if rootbox_state is not None:
+            return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "G001"})
+
+        # オブジェクトを生成
+        new_rootbox_state = UserRootBoxState()
+        new_rootbox_state.term = term
+        new_rootbox_state.user = user
+        new_rootbox_state.hash_key_usr = form.cleaned_data["hash_key"]
+        rootbox_state = UserRootBoxState.objects.filter(user=user, term=term).order_by("-index").first()
+        if rootbox_state is None:
+            new_rootbox_state.index = 0
+        else:
+            new_rootbox_state.index = rootbox_state.index + 1
+        
+        # 引く回数状態をセーブ
+        new_rootbox_state.save()
+
+        return apiutil.convert_json_result(request, {"Result": "OK", "ErrorCode": "200"})
     
     except Exception as e:
         print(e)
