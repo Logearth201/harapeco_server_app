@@ -589,3 +589,26 @@ def group_topic_comment_evaluate(request):
     except Exception as e:
         print(e)
         return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "500"})
+
+# WSから呼ばれるAPI
+def is_belong_group_ws(request, group_id):
+    try:
+        # 未ログインは拒否
+        user = request.user
+        if not user.is_authenticated:
+            return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "401"})
+        
+        # グループがなければ未所属とみなす
+        group = Group.objects.get_or_none(id=group_id)
+        if group is None:
+            return apiutil.convert_json_result(request, {"Result": "OK", "ErrorCode": "200", "IsBelong": False})
+        
+        # グループに属していない場合は編集不可
+        edit_authentication = AttributeGroupInfo.objects.get_or_none(user=user, group=group)
+        if edit_authentication is None:
+            return apiutil.convert_json_result(request, {"Result": "OK", "ErrorCode": "200", "IsBelong": False})
+        else:
+            return apiutil.convert_json_result(request, {"Result": "OK", "ErrorCode": "200", "IsBelong": True})
+    except Exception as e:
+        print(e)
+        return apiutil.convert_json_result(request, {"Result": "NG", "ErrorCode": "500"})
